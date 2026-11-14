@@ -12,9 +12,9 @@
 ```
 Phase 1: Environment, DB & Project Setup (Ports 3100 / 5434, Prisma schema, Seeds)  [COMPLETED ✅]
    ▼
-Phase 2: Domain Utilities & SwiftDrop Abstraction (Types, Status rules, Mock/Live clients, Vitest)
+Phase 2: Domain Utilities & SwiftDrop Abstraction (Types, Status rules, Mock/Live clients, Vitest) [COMPLETED ✅]
    ▼
-Phase 3: Core Transaction Pipeline & Order Booking (applyStatus, booking service, Checkout action)
+Phase 3: Core Transaction Pipeline & Order Booking (applyStatus, booking service, Checkout action) [READY TO IMPLEMENT ⏳]
    ▼
 Phase 4: Status Updates — Webhooks & Polling (HMAC verification, poller, cron route, simulator)
    ▼
@@ -50,37 +50,39 @@ Phase 6: Live ERP Integration & E2E Verification (Seed zones SQL, API key, couri
 ---
 
 ### Phase 2: Domain Utilities & SwiftDrop Abstraction
-**Status:** Ready to Implement ⏳
+**Status:** Completed ✅ (Detailed report in [`docs/developer-2.md`](./developer-2.md))
 
-- [ ] **Step 2.1:** ERP contract types & Zod schemas (`src/lib/swiftdrop/types.ts`).
+- [x] **Step 2.1:** ERP contract types & Zod schemas (`src/lib/swiftdrop/types.ts`).
   - Request/response schemas: `CreateMerchantOrderRequest`, `MerchantOrderResponse`, `PublicTracking`, `StatusChangedEvent`.
-- [ ] **Step 2.2:** Pure domain helpers:
+- [x] **Step 2.2:** Pure domain helpers:
   - `src/lib/swiftdrop/reference.ts`: Deterministic reference generation (`merchantRefFor(orderNumber, attempt)`).
   - `src/lib/swiftdrop/parcel.ts`: Shoe count to parcel sizing & weight calculation (`parcelFor(pairs)`).
   - `src/lib/phone.ts`: Sri Lankan phone number sanitization to `+94XXXXXXXXX` (`normalizeLkPhone`).
   - `src/lib/swiftdrop/zones.ts`: Zone lookup and tiered customer delivery fee calculation.
-- [ ] **Step 2.3:** Status transition state machine (`src/lib/swiftdrop/status.ts`).
+  - `src/lib/validation.ts`: Checkout & registration schemas with normalized phone and postal code.
+- [x] **Step 2.3:** Status transition state machine (`src/lib/swiftdrop/status.ts`).
   - Rank-based forward validation (`shouldMoveTo(current, next)`).
   - Terminal state validation (`isTerminal(status)`).
   - Human-friendly customer status labels and failure descriptions.
-- [ ] **Step 2.4:** Error classification & client interface (`src/lib/swiftdrop/errors.ts`, `src/lib/swiftdrop/client.ts`).
+- [x] **Step 2.4:** Error classification & client interface (`src/lib/swiftdrop/errors.ts`, `src/lib/swiftdrop/client.ts`).
   - Error classification into `AUTH`, `RETRYABLE`, and `REJECTED`.
   - Client interface declaring `createOrder` and `getTracking`.
-- [ ] **Step 2.5:** Mock SwiftDrop client (`src/lib/swiftdrop/mock.ts`).
+- [x] **Step 2.5:** Mock SwiftDrop client (`src/lib/swiftdrop/mock.ts`).
   - Deterministic tracking number generator (`SD` + 10 characters).
   - Safe replay handling (`newlyCreated: false`).
   - Fault injection toggle via `SWIFTDROP_MOCK_FAIL=true`.
-- [ ] **Step 2.6:** Live SwiftDrop HTTP client (`src/lib/swiftdrop/live.ts`).
+- [x] **Step 2.6:** Live SwiftDrop HTTP client (`src/lib/swiftdrop/live.ts`).
   - `POST /api/v1/merchant-api/orders` with `X-API-Key` and timeout signal.
   - `GET /api/v1/tracked-parcels/{trackingNumber}` (public tracking).
   - RFC 9457 Problem Details error parsing.
-- [ ] **Step 2.7:** Vitest unit test suite covering signature, status rules, reference generation, and parcel sizing.
-- **Check:** `npm test` passes 100% of domain tests without database or network.
+- [x] **Step 2.7:** HMAC-SHA256 signature verification & signing (`src/lib/swiftdrop/signature.ts`).
+- [x] **Step 2.8:** Vitest unit test suite covering signature, status rules, reference generation, parcel sizing, phone normalization, mock client, and schemas.
+- **Check:** `npm test` passed 10/10 test files (60/60 tests); `npm run lint` 0 errors/0 warnings; `npm run build` compiled successfully. ✅
 
 ---
 
 ### Phase 3: Core Transaction Pipeline & Order Booking
-**Status:** Pending
+**Status:** Ready to Implement ⏳
 
 - [ ] **Step 3.1:** State mutation engine (`src/lib/swiftdrop/apply-status.ts`).
   - Row locking via `SELECT ... FOR UPDATE` to avoid webhook/poller race conditions.
