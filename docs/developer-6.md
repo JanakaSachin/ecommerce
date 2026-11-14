@@ -183,3 +183,4 @@ Or click **"Sync with SwiftDrop ERP ↻"** directly in `/admin/zones`.
 All 6 phases of the SwiftDrop Merchant Integration Plan have been fully implemented, rigorously tested, and documented across `docs/developer-1.md` through `docs/developer-6.md`.
 
 The StrideLK E-Commerce store is fully architected, styled, and ready for production operations with SwiftDrop ERP.
+

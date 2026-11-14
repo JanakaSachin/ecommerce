@@ -21,3 +21,4 @@ FROM zones o CROSS JOIN zones d
 ON CONFLICT (origin_zone_id, destination_zone_id) DO NOTHING;
 
 SELECT id, code, name FROM zones ORDER BY code;
+
