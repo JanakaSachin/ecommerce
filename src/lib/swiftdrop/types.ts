@@ -7,6 +7,8 @@ export const PARCEL_STATUSES = [
   "OUT_FOR_DELIVERY",
   "DELIVERED",
   "FAILED",
+  "PAUSED",
+  "CANCELLED",
 ] as const;
 export type ParcelStatus = (typeof PARCEL_STATUSES)[number];
 

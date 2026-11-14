@@ -7,7 +7,7 @@ export type OrderStatusDTO = {
   orderNumber: number;
   shipment: null | {
     attempt: number;
-    state: "PENDING_BOOKING" | "BOOKED" | "NEEDS_ATTENTION" | "DELIVERED" | "FAILED";
+    state: "PENDING_BOOKING" | "BOOKED" | "NEEDS_ATTENTION" | "DELIVERED" | "FAILED" | "CANCELLED";
     trackingNumber: string | null;
     deliveryStatus: string | null;
     failureReason: string | null;
@@ -32,7 +32,7 @@ export function toStatusDTO(
       deliveryStatus: shipment.deliveryStatus,
       failureReason: shipment.failureReason,
       events: [...shipment.events]
-        .sort((a, b) => a.occurredAt.getTime() - b.occurredAt.getTime())
+        .sort((a, b) => a.sequence - b.sequence)
         .map((e) => ({
           status: e.status,
           failureReason: e.failureReason,
@@ -45,10 +45,10 @@ export function toStatusDTO(
 export const isFinal = (input: OrderStatusDTO | string | null | undefined): boolean => {
   if (!input) return false;
   if (typeof input === "string") {
-    return input === "DELIVERED" || input === "FAILED";
+    return input === "DELIVERED" || input === "FAILED" || input === "CANCELLED";
   }
   const s = input.shipment?.state;
-  return s === "DELIVERED" || s === "FAILED";
+  return s === "DELIVERED" || s === "FAILED" || s === "CANCELLED";
 };
 
 // Main steps in chronological order per ADR 0006 (no ASSIGNED status)
@@ -57,7 +57,7 @@ const MAIN_STEPS = ["CREATED", "PICKED_UP", "IN_TRANSIT", "OUT_FOR_DELIVERY"] as
 export type TimelineStep = {
   status: string;
   label: string;
-  state: "done" | "current" | "upcoming" | "failed";
+  state: "done" | "current" | "upcoming" | "failed" | "held" | "cancelled";
   at?: string;
   failureReason?: string | null;
   failureMessage?: string;
@@ -71,11 +71,20 @@ export function buildTimeline(dto: OrderStatusDTO): TimelineStep[] {
 
   const failed = shipment.deliveryStatus === "FAILED";
   const delivered = shipment.deliveryStatus === "DELIVERED";
-  const steps = [...MAIN_STEPS, failed ? "FAILED" : "DELIVERED"];
+  const cancelled = shipment.deliveryStatus === "CANCELLED";
+  const paused = shipment.deliveryStatus === "PAUSED";
+  // A cancelled delivery ends right after booking; a held one shows the hold before the
+  // remaining steps, which come back into play when the seller releases it.
+  const steps: string[] = cancelled
+    ? ["CREATED", "CANCELLED"]
+    : paused
+      ? ["CREATED", "PAUSED", ...MAIN_STEPS.slice(1), "DELIVERED"]
+      : [...MAIN_STEPS, failed ? "FAILED" : "DELIVERED"];
 
   const eventMap = new Map<string, OrderStatusDTO["shipment"] extends infer S ? (S extends { events: (infer E)[] } ? E : never) : never>();
   for (const e of shipment.events) {
-    if (!eventMap.has(e.status)) eventMap.set(e.status, e);
+    // Keep the first booking time, but the latest hold (a delivery can be held more than once).
+    if (!eventMap.has(e.status) || e.status === "PAUSED") eventMap.set(e.status, e);
   }
 
   let reached = -1;
@@ -91,7 +100,15 @@ export function buildTimeline(dto: OrderStatusDTO): TimelineStep[] {
     if (i < reached) {
       state = failed && !ev ? "upcoming" : "done"; // Gap-filling visual progression
     } else if (i === reached) {
-      state = failed ? "failed" : delivered ? "done" : "current";
+      state = failed
+        ? "failed"
+        : cancelled
+          ? "cancelled"
+          : paused
+            ? "held"
+            : delivered
+              ? "done"
+              : "current";
     } else {
       state = "upcoming";
     }
@@ -128,6 +145,10 @@ export function statusBadge(state?: string, deliveryStatus?: string | null) {
       return { label: "In transit", cls: "bg-blue-100 text-blue-800" };
     case "PICKED_UP":
       return { label: "Picked up", cls: "bg-indigo-100 text-indigo-800" };
+    case "PAUSED":
+      return { label: "On hold", cls: "bg-amber-100 text-amber-800" };
+    case "CANCELLED":
+      return { label: "Cancelled", cls: "bg-gray-200 text-gray-700" };
     case "CREATED":
       return { label: "Booked with SwiftDrop", cls: "bg-purple-100 text-purple-800" };
     default:

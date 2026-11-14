@@ -7,9 +7,10 @@ import { randomUUID } from "crypto";
 import { db } from "@/lib/db";
 import { requireAdmin } from "@/lib/session";
 import { bookShipment, retryDueBookings } from "@/lib/swiftdrop/booking";
-import { applyStatus } from "@/lib/swiftdrop/apply-status";
+import { applyTrackingHistory } from "@/lib/swiftdrop/apply-status";
 import { merchantRefFor } from "@/lib/swiftdrop/reference";
 import { handleStatusEvent } from "@/lib/swiftdrop/webhook";
+import { isTerminal } from "@/lib/swiftdrop/status";
 import { swiftDrop } from "@/lib/swiftdrop/client";
 import type { DeliveryStatus, FailureReason } from "@prisma/client";
 
@@ -75,17 +76,7 @@ export async function pollShipmentNow(formData: FormData): Promise<void> {
 
     let moved = false;
     await db.$transaction(async (tx) => {
-      const history = [...view.history].sort(
-        (a, b) => Date.parse(a.occurredAt) - Date.parse(b.occurredAt),
-      );
-      for (const h of history) {
-        const r = await applyStatus(tx, shipment.id, {
-          status: h.status,
-          occurredAt: new Date(h.occurredAt),
-          source: "POLL",
-        });
-        if (r.moved) moved = true;
-      }
+      if ((await applyTrackingHistory(tx, shipment.id, view, "POLL")) > 0) moved = true;
       await tx.shipment.update({
         where: { id: shipment.id },
         data: { lastPolledAt: new Date() },
@@ -167,6 +158,8 @@ const NEXT_STATUS: Record<DeliveryStatus, DeliveryStatus | null> = {
   OUT_FOR_DELIVERY: "DELIVERED",
   DELIVERED: null,
   FAILED: null,
+  PAUSED: null, // a hold is released by the seller in SwiftDrop, not stepped forward
+  CANCELLED: null,
 };
 
 /** Simulates the next status step in mock mode via signed webhook pipeline */
@@ -183,6 +176,7 @@ export async function simulateNextStatus(formData: FormData): Promise<void> {
       trackingNumber: true,
       parcelId: true,
       deliveryStatus: true,
+      lastSequence: true,
     },
   });
 
@@ -206,7 +200,7 @@ export async function simulateNextStatus(formData: FormData): Promise<void> {
       trackingNumber: shipment.trackingNumber ?? "SD0000000000",
       previousStatus: shipment.deliveryStatus,
       newStatus: next,
-      sequence: 2,
+      sequence: shipment.lastSequence + 1,
       source: "MERCHANT",
       ownerCustomerId: null,
       ownerMerchantId: randomUUID(),
@@ -241,6 +235,7 @@ export async function simulateFailure(formData: FormData): Promise<void> {
       trackingNumber: true,
       parcelId: true,
       deliveryStatus: true,
+      lastSequence: true,
     },
   });
 
@@ -248,7 +243,7 @@ export async function simulateFailure(formData: FormData): Promise<void> {
     return finish(formData, false, "Shipment has not been booked yet");
   }
 
-  if (shipment.deliveryStatus === "DELIVERED" || shipment.deliveryStatus === "FAILED") {
+  if (isTerminal(shipment.deliveryStatus)) {
     return finish(formData, false, `Shipment is already in final status ${shipment.deliveryStatus}`);
   }
 
@@ -263,7 +258,7 @@ export async function simulateFailure(formData: FormData): Promise<void> {
       trackingNumber: shipment.trackingNumber ?? "SD0000000000",
       previousStatus: shipment.deliveryStatus,
       newStatus: "FAILED" as const,
-      sequence: 5,
+      sequence: shipment.lastSequence + 1,
       source: "MERCHANT",
       ownerCustomerId: null,
       ownerMerchantId: randomUUID(),

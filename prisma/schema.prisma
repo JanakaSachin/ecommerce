@@ -26,6 +26,8 @@ enum DeliveryStatus {
   OUT_FOR_DELIVERY
   DELIVERED
   FAILED
+  PAUSED     // seller put the delivery on hold before pickup; can be released
+  CANCELLED  // seller cancelled before pickup (final)
 }
 
 /// Same values as SwiftDrop's FailureReason.
@@ -44,6 +46,7 @@ enum ShipmentState {
   NEEDS_ATTENTION
   DELIVERED
   FAILED
+  CANCELLED
 }
 
 enum EventSource {
@@ -184,6 +187,7 @@ model Shipment {
   parcelId          String?         @unique
   trackingNumber    String?         @unique
   deliveryStatus    DeliveryStatus?
+  lastSequence      Int             @default(0)   // highest SwiftDrop event sequence applied
   failureReason     FailureReason?
   courierFee        Decimal?        @db.Decimal(12, 2)  // SwiftDrop's fee = our cost
   bookedAt          DateTime?
@@ -211,13 +215,13 @@ model DeliveryEvent {
   shipment      Shipment       @relation(fields: [shipmentId], references: [id], onDelete: Cascade)
   status        DeliveryStatus
   failureReason FailureReason?
-  sequence      Int?           // from webhooks only
+  sequence      Int            // SwiftDrop's per-parcel sequence (CREATED = 1)
   eventId       String?        // from webhooks only
   source        EventSource
   occurredAt    DateTime
   createdAt     DateTime       @default(now())
 
-  @@unique([shipmentId, status])
+  @@unique([shipmentId, sequence])
 }
 
 /// Copy of SwiftDrop zones. id = SwiftDrop's zone UUID.

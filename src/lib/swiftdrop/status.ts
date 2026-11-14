@@ -1,28 +1,29 @@
 import type { DeliveryStatus, ShipmentState } from "@prisma/client";
 
-const RANK: Record<DeliveryStatus, number> = {
-  CREATED: 1,
-  PICKED_UP: 2,
-  IN_TRANSIT: 3,
-  OUT_FOR_DELIVERY: 4,
-  DELIVERED: 9,
-  FAILED: 9,
-};
-
+/** Statuses after which SwiftDrop never reports anything more. */
 export const isTerminal = (s: DeliveryStatus | null | undefined): boolean =>
-  s === "DELIVERED" || s === "FAILED";
+  s === "DELIVERED" || s === "FAILED" || s === "CANCELLED";
 
 /**
- * Evaluates whether a shipment currently at `current` may transition to `next`.
+ * Evaluates whether news with `nextSequence` should replace a shipment whose latest applied
+ * event has `lastSequence` and status `current`.
+ *
+ * SwiftDrop numbers every status change of a parcel (CREATED = 1) and a seller can hold and
+ * release a parcel before pickup (CREATED -> PAUSED -> CREATED), so status order alone cannot tell
+ * old news from new news. The sequence can.
  * Invariants:
- * 1. Current null can transition to any initial status.
- * 2. Terminal statuses (DELIVERED, FAILED) can never transition again.
- * 3. Statuses can only advance forward in rank. Older or duplicate events return false.
+ * 1. A shipment with no status yet accepts any first news.
+ * 2. Terminal statuses (DELIVERED, FAILED, CANCELLED) never change again.
+ * 3. Otherwise only a strictly higher sequence wins. Older or duplicate events return false.
  */
-export function shouldMoveTo(current: DeliveryStatus | null, next: DeliveryStatus): boolean {
+export function shouldMoveTo(
+  current: DeliveryStatus | null,
+  lastSequence: number,
+  nextSequence: number,
+): boolean {
   if (current === null) return true;
-  if (isTerminal(current)) return false; // final: nothing moves it
-  return RANK[next] > RANK[current]; // strictly forward only
+  if (isTerminal(current)) return false;
+  return nextSequence > lastSequence;
 }
 
 /**
@@ -31,7 +32,8 @@ export function shouldMoveTo(current: DeliveryStatus | null, next: DeliveryStatu
 export function shipmentStateFor(status: DeliveryStatus): ShipmentState {
   if (status === "DELIVERED") return "DELIVERED";
   if (status === "FAILED") return "FAILED";
-  return "BOOKED";
+  if (status === "CANCELLED") return "CANCELLED";
+  return "BOOKED"; // includes PAUSED: still open, so it keeps being polled
 }
 
 export const STATUS_LABELS: Record<DeliveryStatus, string> = {
@@ -41,6 +43,8 @@ export const STATUS_LABELS: Record<DeliveryStatus, string> = {
   OUT_FOR_DELIVERY: "Out for delivery. Keep your phone nearby!",
   DELIVERED: "Delivered",
   FAILED: "Delivery unsuccessful",
+  PAUSED: "Delivery is on hold while we prepare your order",
+  CANCELLED: "Delivery cancelled",
 };
 
 export const FAILURE_TEXT: Record<string, string> = {
@@ -50,4 +54,3 @@ export const FAILURE_TEXT: Record<string, string> = {
   DAMAGED: "The parcel was damaged in transit.",
   OTHER: "The delivery couldn't be completed.",
 };
-

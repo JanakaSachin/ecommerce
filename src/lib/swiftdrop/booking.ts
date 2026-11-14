@@ -2,7 +2,7 @@ import "server-only";
 import type { Order, Shipment } from "@prisma/client";
 import { db } from "@/lib/db";
 import { env } from "@/lib/env";
-import { applyStatus } from "./apply-status";
+import { applyStatus, applyTrackingHistory } from "./apply-status";
 import { swiftDrop } from "./client";
 import { SwiftDropError, type FailureKind } from "./errors";
 import type { CreateMerchantOrderRequest } from "./types";
@@ -76,6 +76,9 @@ export async function bookShipment(shipmentId: string): Promise<BookResult> {
 
   try {
     const res = await swiftDrop().createOrder(buildCreateRequest(s));
+    // A replay (200) can return a later status, e.g. PICKED_UP or PAUSED. Then we need the whole
+    // history to know the sequence numbers, so fetch it before the transaction.
+    const replayView = res.status === "CREATED" ? null : await swiftDrop().getTracking(res.trackingNumber);
 
     await db.$transaction(async (tx) => {
       await tx.shipment.update({
@@ -91,12 +94,18 @@ export async function bookShipment(shipmentId: string): Promise<BookResult> {
           bookingLeaseUntil: null,
         },
       });
-      // A replay (200) can return a later status, e.g. PICKED_UP.
-      await applyStatus(tx, s.id, {
-        status: res.status,
-        occurredAt: res.status === "CREATED" ? new Date(res.createdAt) : new Date(),
-        source: "BOOKING",
-      });
+      if (replayView) {
+        await applyTrackingHistory(tx, s.id, replayView, "BOOKING");
+      } else {
+        // CREATED is always sequence 1. (If a replay's history could not be fetched, this still
+        // marks the shipment booked; the poller applies the later statuses.)
+        await applyStatus(tx, s.id, {
+          status: res.status,
+          occurredAt: res.status === "CREATED" ? new Date(res.createdAt) : new Date(),
+          source: "BOOKING",
+          sequence: 1,
+        });
+      }
     });
     return { ok: true, trackingNumber: res.trackingNumber };
   } catch (e) {

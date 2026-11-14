@@ -1,7 +1,7 @@
 import "server-only";
 import { db } from "@/lib/db";
 import { env } from "@/lib/env";
-import { applyStatus } from "./apply-status";
+import { applyTrackingHistory } from "./apply-status";
 import { swiftDrop } from "./client";
 
 /**
@@ -31,17 +31,7 @@ export async function pollOpenShipments(
       const view = await swiftDrop().getTracking(s.trackingNumber!);
       await db.$transaction(async (tx) => {
         if (view) {
-          const history = [...view.history].sort(
-            (a, b) => Date.parse(a.occurredAt) - Date.parse(b.occurredAt),
-          );
-          for (const h of history) {
-            const r = await applyStatus(tx, s.id, {
-              status: h.status,
-              occurredAt: new Date(h.occurredAt),
-              source: "POLL",
-            });
-            if (r.moved) moved++;
-          }
+          moved += await applyTrackingHistory(tx, s.id, view, "POLL");
         }
         await tx.shipment.update({ where: { id: s.id }, data: { lastPolledAt: new Date() } });
       });

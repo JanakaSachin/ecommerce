@@ -53,6 +53,7 @@ describe("booking create request builder (buildCreateRequest)", () => {
       parcelId: null,
       trackingNumber: null,
       deliveryStatus: null,
+      lastSequence: 0,
       failureReason: null,
       courierFee: null,
       bookedAt: null,

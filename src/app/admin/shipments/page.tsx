@@ -24,6 +24,7 @@ const STATES = [
   "NEEDS_ATTENTION",
   "DELIVERED",
   "FAILED",
+  "CANCELLED",
 ] as const;
 
 export default async function AdminShipmentsPage({ searchParams }: { searchParams: SP }) {

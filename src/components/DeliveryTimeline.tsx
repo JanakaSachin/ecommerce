@@ -23,9 +23,13 @@ export default function DeliveryTimeline({ data }: { data: OrderStatusDTO }) {
         const dot =
           s.state === "failed"
             ? "bg-red-600 text-white"
-            : s.state === "upcoming"
-              ? "bg-gray-200 text-gray-400"
-              : "bg-indigo-600 text-white";
+            : s.state === "held"
+              ? "bg-amber-500 text-white"
+              : s.state === "cancelled"
+                ? "bg-gray-500 text-white"
+                : s.state === "upcoming"
+                  ? "bg-gray-200 text-gray-400"
+                  : "bg-indigo-600 text-white";
 
         return (
           <li key={s.status} className="relative flex gap-4 pb-6 last:pb-0">
@@ -41,7 +45,13 @@ export default function DeliveryTimeline({ data }: { data: OrderStatusDTO }) {
                 s.state === "current" ? "ring-4 ring-indigo-200" : ""
               }`}
             >
-              {s.state === "failed" ? "✕" : s.state === "upcoming" ? k + 1 : "✓"}
+              {s.state === "failed" || s.state === "cancelled"
+                ? "✕"
+                : s.state === "held"
+                  ? "⏸"
+                  : s.state === "upcoming"
+                    ? k + 1
+                    : "✓"}
             </span>
             <div>
               <p
@@ -50,7 +60,9 @@ export default function DeliveryTimeline({ data }: { data: OrderStatusDTO }) {
                     ? "text-gray-400"
                     : s.state === "failed"
                       ? "text-red-700"
-                      : "text-gray-900"
+                      : s.state === "held"
+                        ? "text-amber-700"
+                        : "text-gray-900"
                 }`}
               >
                 {s.status.replaceAll("_", " ")}
@@ -62,6 +74,20 @@ export default function DeliveryTimeline({ data }: { data: OrderStatusDTO }) {
                 <div className="mt-1 rounded bg-red-50 p-2 text-xs text-red-700">
                   <p className="font-medium">{s.failureMessage ?? "Delivery unsuccessful"}</p>
                   <p className="text-gray-600 mt-0.5">We will contact you regarding re-delivery.</p>
+                </div>
+              )}
+              {s.state === "held" && (
+                <div className="mt-1 rounded bg-amber-50 p-2 text-xs text-amber-800">
+                  <p className="font-medium">Your delivery is on hold.</p>
+                  <p className="text-gray-600 mt-0.5">
+                    The seller is still preparing your order. Delivery continues as soon as it is ready.
+                  </p>
+                </div>
+              )}
+              {s.state === "cancelled" && (
+                <div className="mt-1 rounded bg-gray-100 p-2 text-xs text-gray-700">
+                  <p className="font-medium">This delivery was cancelled.</p>
+                  <p className="text-gray-600 mt-0.5">Please contact the store if you have questions.</p>
                 </div>
               )}
               {s.at && s.state !== "upcoming" && (
