@@ -6,10 +6,10 @@ import { cartCount } from "@/lib/cart";
 const NAV = [
   ["Men", "men"],
   ["Women", "women"],
-  ["Kids", "kids"],
-  ["Sports", "sports"],
-  ["Casual", "casual"],
-  ["Formal", "formal"],
+  ["Automatic", "automatic"],
+  ["Chronograph", "chronograph"],
+  ["Smartwatches", "smartwatches"],
+  ["Classic", "classic"],
 ];
 
 export default async function Header() {
@@ -17,22 +17,25 @@ export default async function Header() {
 
   return (
     <header className="sticky top-0 z-40 bg-brand text-white shadow">
-      <div className="bg-accent py-1 text-center text-xs font-medium">
-        Cash on delivery · Island-wide delivery by SwiftDrop
+      <div className="bg-accent py-1 text-center text-xs font-medium tracking-wide">
+        Cash on delivery · Island-wide insured delivery by SwiftDrop
       </div>
 
       <div className="mx-auto flex min-h-16 max-w-7xl flex-wrap items-center gap-x-4 gap-y-2 px-4 py-2">
-        <Link href="/" className="text-2xl font-extrabold tracking-tight">
-          Stride<span className="text-accent">LK</span>
+        <Link href="/" className="flex items-baseline gap-1 text-2xl font-extrabold tracking-tight">
+          <span>Stride<span className="text-accent">LK</span></span>
+          <span className="text-[10px] uppercase font-medium tracking-widest text-gray-300">
+            Timepieces
+          </span>
         </Link>
 
         <form action="/products" className="hidden max-w-md flex-1 md:flex">
           <input
             name="q"
-            placeholder="Search shoes..."
-            className="w-full rounded-l-md bg-white px-3 py-2 text-gray-900 outline-none"
+            placeholder="Search watches, brands, straps..."
+            className="w-full rounded-l-md bg-white px-3 py-2 text-sm text-gray-900 outline-none"
           />
-          <button className="rounded-r-md bg-accent px-4 font-semibold hover:bg-accent-dark">
+          <button className="rounded-r-md bg-accent px-4 text-sm font-semibold hover:bg-accent-dark">
             Search
           </button>
         </form>
@@ -73,7 +76,7 @@ export default async function Header() {
           >
             Cart
             {count > 0 && (
-              <span className="ml-1 rounded-full bg-accent px-1.5 text-xs">
+              <span className="ml-1 rounded-full bg-accent px-1.5 text-xs font-bold">
                 {count}
               </span>
             )}
@@ -81,16 +84,16 @@ export default async function Header() {
         </nav>
       </div>
 
-      <nav className="bg-brand-dark">
+      <nav className="bg-brand-dark border-t border-brand">
         <div className="mx-auto flex h-10 max-w-7xl items-center gap-6 overflow-x-auto px-4 text-sm">
-          <Link href="/products" className="hover:text-accent">
-            All
+          <Link href="/products" className="hover:text-accent font-medium">
+            All Watches
           </Link>
           {NAV.map(([label, slug]) => (
             <Link
               key={slug}
               href={`/category/${slug}`}
-              className="hover:text-accent"
+              className="hover:text-accent whitespace-nowrap"
             >
               {label}
             </Link>
@@ -100,4 +103,3 @@ export default async function Header() {
     </header>
   );
 }
-

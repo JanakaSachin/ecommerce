@@ -36,17 +36,17 @@ export default async function ProductListing({
 
       <form
         action={basePath}
-        className="mt-4 flex flex-wrap items-end gap-3 rounded-lg bg-white p-4 text-sm shadow-sm"
+        className="mt-4 flex flex-wrap items-end gap-3 rounded-lg bg-white p-4 text-sm shadow-sm border border-gray-100"
       >
         {filters.q && <input type="hidden" name="q" value={filters.q} />}
         {showCategoryFilter && (
-          <Field label="Category">
+          <Field label="Collection">
             <select
               name="category"
               defaultValue={filters.category ?? ""}
               className={input}
             >
-              <option value="">All Categories</option>
+              <option value="">All Collections</option>
               {categories.map((c) => (
                 <option key={c.id} value={c.slug}>
                   {c.name}
@@ -55,12 +55,12 @@ export default async function ProductListing({
             </select>
           </Field>
         )}
-        <Field label="Size">
+        <Field label="Case Size / Strap">
           <select name="size" defaultValue={filters.size ?? ""} className={input}>
-            <option value="">Any Size</option>
+            <option value="">Any Size / Material</option>
             {ALL_SIZES.map((s) => (
               <option key={s} value={s}>
-                Size {s}
+                {s}
               </option>
             ))}
           </select>
@@ -81,7 +81,7 @@ export default async function ProductListing({
             type="number"
             min={0}
             defaultValue={filters.max}
-            placeholder="50000"
+            placeholder="100000"
             className={`${input} w-28`}
           />
         </Field>
@@ -104,12 +104,20 @@ export default async function ProductListing({
         </Link>
       </form>
 
-      <p className="mt-4 text-sm text-gray-500">{products.length} products found</p>
+      <p className="mt-4 text-sm text-gray-500">{products.length} timepieces found</p>
 
       {products.length === 0 ? (
-        <p className="mt-10 text-center text-gray-500">No shoes match your filters.</p>
+        <div className="mt-10 rounded-lg bg-white p-12 text-center shadow-sm">
+          <p className="text-gray-500">No timepieces match your selected filters.</p>
+          <Link
+            href={basePath}
+            className="mt-3 inline-block text-sm font-semibold text-accent hover:underline"
+          >
+            Clear filters
+          </Link>
+        </div>
       ) : (
-        <div className="mt-4 grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
+        <div className="mt-6 grid grid-cols-2 gap-6 md:grid-cols-3 lg:grid-cols-4">
           {products.map((p) => (
             <ProductCard key={p.id} product={p} />
           ))}
@@ -118,4 +126,3 @@ export default async function ProductListing({
     </div>
   );
 }
-

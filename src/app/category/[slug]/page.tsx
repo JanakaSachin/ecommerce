@@ -16,10 +16,9 @@ export default async function CategoryPage({
 
   return (
     <ProductListing
-      title={`${category.name} Shoes`}
+      title={category.name}
       filters={{ ...toFilters(await searchParams), category: slug }}
       basePath={`/category/${slug}`}
     />
   );
 }
-

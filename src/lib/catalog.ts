@@ -11,7 +11,18 @@ export type ProductFilters = {
 };
 export type SearchParams = Record<string, string | string[] | undefined>;
 
-export const ALL_SIZES = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11"];
+export const ALL_SIZES = [
+  "32mm",
+  "38mm",
+  "40mm",
+  "41mm",
+  "42mm",
+  "44mm",
+  "45mm",
+  "Leather",
+  "Steel",
+  "Silicone",
+];
 
 const one = (v: string | string[] | undefined) => (Array.isArray(v) ? v[0] : v) || undefined;
 
@@ -35,7 +46,7 @@ export async function findProducts(f: ProductFilters) {
   const where: Prisma.ProductWhereInput = {};
   if (f.q) where.name = { contains: f.q, mode: "insensitive" };
   if (f.category) where.category = { slug: f.category };
-  if (f.size) where.variants = { some: { name: { contains: f.size }, stock: { gt: 0 } } };
+  if (f.size) where.variants = { some: { name: { contains: f.size, mode: "insensitive" }, stock: { gt: 0 } } };
 
   const min = Number(f.min);
   const max = Number(f.max);
@@ -50,5 +61,9 @@ export async function findProducts(f: ProductFilters) {
           ? { name: "asc" }
           : { createdAt: "desc" };
 
-  return db.product.findMany({ where, orderBy, include: productCardInclude });
+  return db.product.findMany({
+    where,
+    orderBy,
+    include: productCardInclude,
+  });
 }

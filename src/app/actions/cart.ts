@@ -36,7 +36,7 @@ export async function addToCart(_prev: CartActionState, formData: FormData): Pro
         (existing ? ` (you already have ${existing.quantity} in your cart)` : ""),
     };
   }
-  if (newQty > MAX_QTY_PER_LINE) return { ok: false, message: `Maximum ${MAX_QTY_PER_LINE} pairs per size` };
+  if (newQty > MAX_QTY_PER_LINE) return { ok: false, message: `Maximum ${MAX_QTY_PER_LINE} items per edition` };
 
   await db.cartItem.upsert({
     where: { cartId_variantId: { cartId, variantId } },

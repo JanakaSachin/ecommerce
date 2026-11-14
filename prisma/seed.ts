@@ -21,7 +21,7 @@ function mockZoneId(n: number): string {
 }
 
 async function main() {
-  console.log("Seeding database...");
+  console.log("Seeding watch catalog and database...");
 
   // 1. Admin user
   const adminEmail = process.env.ADMIN_EMAIL ?? "admin@stridelk.local";
@@ -40,71 +40,188 @@ async function main() {
   });
   console.log(`Admin user created: ${admin.email}`);
 
-  // 2. Sample Categories & Products
-  const shoesCategory = await prisma.category.upsert({
-    where: { slug: "footwear" },
-    update: {},
-    create: {
-      name: "Footwear",
-      slug: "footwear",
-      description: "Premium footwear crafted for comfort and style.",
+  // 2. Watch Categories
+  const categoriesData = [
+    {
+      name: "Men's Watches",
+      slug: "men",
+      description: "Bold chronographs, divers, and executive steel timepieces.",
     },
-  });
+    {
+      name: "Women's Watches",
+      slug: "women",
+      description: "Sophisticated jewelry watches, rose gold finishes, and delicate dials.",
+    },
+    {
+      name: "Automatic & Mechanical",
+      slug: "automatic",
+      description: "Self-winding mechanical movements, open-heart displays, and skeleton calibers.",
+    },
+    {
+      name: "Chronograph",
+      slug: "chronograph",
+      description: "Precision racing and aviation multi-dial stopwatches.",
+    },
+    {
+      name: "Smartwatches",
+      slug: "smartwatches",
+      description: "Connected hybrid and AMOLED fitness smartwatches with sapphire glass.",
+    },
+    {
+      name: "Classic & Dress",
+      slug: "classic",
+      description: "Ultra-slim minimalist dress watches with genuine Italian leather straps.",
+    },
+  ];
 
+  const categoriesMap = new Map<string, string>();
+  for (const c of categoriesData) {
+    const record = await prisma.category.upsert({
+      where: { slug: c.slug },
+      update: { name: c.name, description: c.description },
+      create: c,
+    });
+    categoriesMap.set(c.slug, record.id);
+  }
+
+  // 3. Watch Products & Editions
   const productsData = [
     {
-      name: "Stride Aero Runner",
-      slug: "stride-aero-runner",
-      description: "Lightweight running shoes with responsive cushioning.",
-      basePrice: 12500,
+      name: "Chrono Heritage Automatic 42mm",
+      slug: "chrono-heritage-automatic-42mm",
+      description:
+        "Handcrafted automatic timepiece featuring an exhibition sapphire caseback, 42-hour power reserve, and 316L surgical stainless steel.",
+      basePrice: 48500,
+      imageUrl: "/watches/watch-01.jpg",
+      categorySlug: "automatic",
       variants: [
-        { name: "Size 40 - Black", sku: "SAR-BLK-40", price: 12500, stock: 25 },
-        { name: "Size 41 - Black", sku: "SAR-BLK-41", price: 12500, stock: 30 },
-        { name: "Size 42 - Black", sku: "SAR-BLK-42", price: 12500, stock: 35 },
-        { name: "Size 43 - White", sku: "SAR-WHT-43", price: 12500, stock: 20 },
+        { name: "42mm - Stainless Steel Bracelet", sku: "CHA-42-STL", price: 48500, stock: 15 },
+        { name: "42mm - Midnight Blue Alligator Leather", sku: "CHA-42-BLU", price: 48500, stock: 12 },
+        { name: "40mm - Milanese Mesh Strap", sku: "CHA-40-MSH", price: 46500, stock: 10 },
       ],
     },
     {
-      name: "Urban Classic Oxford",
-      slug: "urban-classic-oxford",
-      description: "Handcrafted full-grain leather shoes for formal occasions.",
-      basePrice: 18000,
+      name: "Nautilus Diver Pro 300M",
+      slug: "nautilus-diver-pro-300m",
+      description:
+        "Professional 300m water-resistant diving instrument with unidirectional rotating ceramic bezel, helium valve, and Super-LumiNova markers.",
+      basePrice: 38000,
+      imageUrl: "/watches/watch-02.jpg",
+      categorySlug: "men",
       variants: [
-        { name: "Size 41 - Brown", sku: "UCO-BRN-41", price: 18000, stock: 15 },
-        { name: "Size 42 - Brown", sku: "UCO-BRN-42", price: 18000, stock: 20 },
-        { name: "Size 43 - Black", sku: "UCO-BLK-43", price: 18000, stock: 18 },
+        { name: "43mm - Ocean Blue / Steel Bracelet", sku: "NDP-43-BLU", price: 38000, stock: 20 },
+        { name: "43mm - Matte Black / Fluoroelastomer Rubber", sku: "NDP-43-BLK", price: 36000, stock: 18 },
       ],
     },
     {
-      name: "Everyday Street Sneaker",
-      slug: "everyday-street-sneaker",
-      description: "Casual canvas sneakers built for all-day comfort.",
-      basePrice: 8500,
+      name: "AeroMaster Pilot Chronograph",
+      slug: "aeromaster-pilot-chronograph",
+      description:
+        "Aviation-grade high precision chronograph with tachymeter scale, anti-magnetic inner shield, and anti-reflective coated sapphire.",
+      basePrice: 42000,
+      imageUrl: "/watches/watch-03.jpg",
+      categorySlug: "chronograph",
       variants: [
-        { name: "Size 39 - Navy", sku: "ESS-NVY-39", price: 8500, stock: 40 },
-        { name: "Size 40 - Navy", sku: "ESS-NVY-40", price: 8500, stock: 45 },
-        { name: "Size 41 - Grey", sku: "ESS-GRY-41", price: 8500, stock: 50 },
+        { name: "44mm - Gunmetal PVD / Saddle Leather", sku: "AMP-44-SAD", price: 42000, stock: 14 },
+        { name: "44mm - Brushed Steel / Black Pilot Strap", sku: "AMP-44-BLK", price: 42000, stock: 16 },
+      ],
+    },
+    {
+      name: "Monaco Grand Prix Chronograph",
+      slug: "monaco-grand-prix-chronograph",
+      description:
+        "Vintage racing stopwatch with dual sunray sub-dials, sapphire crystal, and breathable perforated rally leather strap.",
+      basePrice: 35500,
+      imageUrl: "/watches/watch-04.jpg",
+      categorySlug: "chronograph",
+      variants: [
+        { name: "41mm - Racing White / Perforated Black", sku: "MGP-41-WHT", price: 35500, stock: 22 },
+        { name: "41mm - Anthracite / Orange Stitching", sku: "MGP-41-ANT", price: 35500, stock: 15 },
+      ],
+    },
+    {
+      name: "Lumiere Minimalist Dress Watch",
+      slug: "lumiere-minimalist-dress-watch",
+      description:
+        "Ultra-slim 6.8mm profile executive dress watch with understated sunburst dial and supple Italian calfskin leather.",
+      basePrice: 26000,
+      imageUrl: "/watches/watch-05.jpg",
+      categorySlug: "classic",
+      variants: [
+        { name: "38mm - Rose Gold / Espresso Leather", sku: "LMD-38-ROS", price: 26000, stock: 25 },
+        { name: "38mm - Silver / Midnight Black Leather", sku: "LMD-38-SLV", price: 26000, stock: 30 },
+        { name: "40mm - Champagne Gold / Honey Brown", sku: "LMD-40-GLD", price: 27500, stock: 18 },
+      ],
+    },
+    {
+      name: "Apex Titanium Connected Smartwatch",
+      slug: "apex-titanium-connected-smartwatch",
+      description:
+        "Aerospace grade 5 titanium smartwatch featuring always-on AMOLED touchscreen, titanium bezel, SpO2 sensor, and 14-day battery life.",
+      basePrice: 52000,
+      imageUrl: "/watches/watch-06.jpg",
+      categorySlug: "smartwatches",
+      variants: [
+        { name: "45mm - DLC Matte Black / Titanium Link", sku: "ATC-45-BLK", price: 54000, stock: 12 },
+        { name: "45mm - Raw Titanium / Sport Silicone", sku: "ATC-45-RAW", price: 52000, stock: 20 },
+      ],
+    },
+    {
+      name: "Symphony Skeleton Automatic",
+      slug: "symphony-skeleton-automatic",
+      description:
+        "Exquisite open-worked skeleton timepiece revealing the hand-finished 24-jewel automatic movement and gold-toned balance wheel.",
+      basePrice: 65000,
+      imageUrl: "/watches/watch-07.jpg",
+      categorySlug: "automatic",
+      variants: [
+        { name: "42mm - Polished Steel / Black Leather", sku: "SSA-42-STL", price: 65000, stock: 8 },
+        { name: "42mm - Rose Gold / Havana Brown Leather", sku: "SSA-42-ROS", price: 68000, stock: 6 },
+      ],
+    },
+    {
+      name: "Petite Diamond Edition",
+      slug: "petite-diamond-edition",
+      description:
+        "Fine jewelry women's timepiece adorned with hand-set brilliant crystals, natural mother-of-pearl dial, and jewelry clasp bracelet.",
+      basePrice: 29500,
+      imageUrl: "/watches/watch-08.jpg",
+      categorySlug: "women",
+      variants: [
+        { name: "32mm - Two-Tone Rose Gold & Silver", sku: "PDE-32-TWT", price: 29500, stock: 15 },
+        { name: "32mm - Pure Silver Milanese Mesh", sku: "PDE-32-SLV", price: 28000, stock: 20 },
+        { name: "34mm - Champagne Gold Bracelet", sku: "PDE-34-GLD", price: 31000, stock: 12 },
       ],
     },
   ];
 
   for (const p of productsData) {
+    const categoryId = categoriesMap.get(p.categorySlug);
+    if (!categoryId) continue;
+
     const product = await prisma.product.upsert({
       where: { slug: p.slug },
-      update: { basePrice: p.basePrice },
+      update: {
+        name: p.name,
+        description: p.description,
+        basePrice: p.basePrice,
+        imageUrl: p.imageUrl,
+        categoryId,
+      },
       create: {
         name: p.name,
         slug: p.slug,
         description: p.description,
         basePrice: p.basePrice,
-        categoryId: shoesCategory.id,
+        imageUrl: p.imageUrl,
+        categoryId,
       },
     });
 
     for (const v of p.variants) {
       await prisma.productVariant.upsert({
         where: { sku: v.sku },
-        update: { stock: v.stock, price: v.price },
+        update: { name: v.name, price: v.price, stock: v.stock },
         create: {
           productId: product.id,
           name: v.name,
@@ -115,30 +232,24 @@ async function main() {
       });
     }
   }
-  console.log("Sample catalog populated.");
+  console.log(`Created ${productsData.length} watch collections with variants.`);
 
-  // 3. SwiftDrop Zones (Mock mode default 9 zones)
-  const zoneMap = new Map<string, string>();
+  // 4. Delivery Zones (9 Provinces)
+  const now = new Date();
   for (const z of PROVINCE_ZONES) {
-    const id = mockZoneId(z.n);
+    const zoneId = mockZoneId(z.n);
     await prisma.deliveryZone.upsert({
-      where: { id },
-      update: { code: z.code, name: z.name, active: true },
-      create: {
-        id,
-        code: z.code,
-        name: z.name,
-        active: true,
-      },
+      where: { id: zoneId },
+      update: { code: z.code, name: z.name, syncedAt: now, active: true },
+      create: { id: zoneId, code: z.code, name: z.name, syncedAt: now, active: true },
     });
-    zoneMap.set(z.code, id);
   }
-  console.log(`Seeded ${PROVINCE_ZONES.length} delivery zones.`);
 
-  // 4. District -> Zone Mappings
+  // 5. District-to-Zone Mappings (All 25 Districts)
   for (const [district, provinceCode] of Object.entries(DISTRICTS)) {
-    const zoneId = zoneMap.get(provinceCode);
-    if (zoneId) {
+    const zone = PROVINCE_ZONES.find((z) => z.code === provinceCode);
+    if (zone) {
+      const zoneId = mockZoneId(zone.n);
       await prisma.districtZone.upsert({
         where: { district },
         update: { zoneId },
@@ -146,37 +257,38 @@ async function main() {
       });
     }
   }
-  console.log(`Mapped ${Object.keys(DISTRICTS).length} districts to delivery zones.`);
 
-  // 5. Delivery Rates (what we charge customers)
+  // 6. Delivery Rates per Zone & Size
   for (const z of PROVINCE_ZONES) {
-    const zoneId = zoneMap.get(z.code)!;
-    const isWestern = z.code === "WP";
+    const zoneId = mockZoneId(z.n);
+    const rates: { size: ParcelSize; fee: number }[] =
+      z.code === "WP"
+        ? [
+            { size: ParcelSize.SMALL, fee: 350 },
+            { size: ParcelSize.MEDIUM, fee: 450 },
+            { size: ParcelSize.LARGE, fee: 600 },
+          ]
+        : [
+            { size: ParcelSize.SMALL, fee: 450 },
+            { size: ParcelSize.MEDIUM, fee: 550 },
+            { size: ParcelSize.LARGE, fee: 750 },
+          ];
 
-    const rates: { size: ParcelSize; fee: number }[] = [
-      { size: ParcelSize.SMALL, fee: isWestern ? 350 : 450 },
-      { size: ParcelSize.MEDIUM, fee: isWestern ? 400 : 500 },
-      { size: ParcelSize.LARGE, fee: isWestern ? 550 : 700 },
-    ];
-
-    for (const rate of rates) {
+    for (const r of rates) {
       await prisma.deliveryRate.upsert({
-        where: { zoneId_size: { zoneId, size: rate.size } },
-        update: { fee: rate.fee },
-        create: {
-          zoneId,
-          size: rate.size,
-          fee: rate.fee,
-        },
+        where: { zoneId_size: { zoneId, size: r.size } },
+        update: { fee: r.fee },
+        create: { zoneId, size: r.size, fee: r.fee },
       });
     }
   }
-  console.log("Seeded delivery rates for all zones.");
+
+  console.log("Database seeded successfully with luxury watch catalog!");
 }
 
 main()
   .catch((e) => {
-    console.error("Seed failed:", e);
+    console.error("Error during seeding:", e);
     process.exit(1);
   })
   .finally(async () => {

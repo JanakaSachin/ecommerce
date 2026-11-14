@@ -4,8 +4,8 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 
 export const metadata: Metadata = {
-  title: "StrideLK – Shoes delivered island-wide",
-  description: "Demo merchant store for the SwiftDrop courier system.",
+  title: "StrideLK Timepieces – Luxury & Precision Watches",
+  description: "Curated automatic, chronograph, and luxury watches. Island-wide insured delivery powered by SwiftDrop.",
 };
 
 export default function RootLayout({

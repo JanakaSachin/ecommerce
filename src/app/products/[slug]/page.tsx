@@ -42,10 +42,10 @@ export default async function ProductPage({
         / <span className="text-gray-800">{product.name}</span>
       </nav>
 
-      <div className="mt-6 grid gap-8 md:grid-cols-2">
-        <div className="relative aspect-square overflow-hidden rounded-lg bg-white shadow-sm">
+      <div className="mt-6 grid gap-10 md:grid-cols-2">
+        <div className="relative aspect-square overflow-hidden rounded-xl bg-white shadow-sm border border-gray-100">
           <Image
-            src={product.imageUrl || "/hero.jpg"}
+            src={product.imageUrl || "/watches/watch-01.jpg"}
             alt={product.name}
             fill
             priority
@@ -55,31 +55,48 @@ export default async function ProductPage({
         </div>
 
         <div>
-          <p className="text-sm font-semibold uppercase tracking-wider text-gray-500">
+          <p className="text-xs font-semibold uppercase tracking-wider text-accent">
             {product.category.name}
           </p>
-          <h1 className="mt-1 text-3xl font-bold text-gray-900">{product.name}</h1>
+          <h1 className="mt-1 text-3xl font-extrabold text-gray-900 tracking-tight">
+            {product.name}
+          </h1>
           <p className="mt-2 text-2xl font-bold text-accent">
             {formatLKR(product.basePrice)}
           </p>
-          <p className="mt-4 text-gray-700 leading-relaxed">{product.description}</p>
+          <p className="mt-4 text-gray-700 leading-relaxed text-sm">
+            {product.description}
+          </p>
 
           <SizePicker variants={product.variants} />
 
-          <div className="mt-6 rounded-lg border border-gray-200 bg-white p-4 text-sm text-gray-700 shadow-sm space-y-1.5">
-            <p>
-              🚚 Delivered by <span className="font-semibold text-brand">SwiftDrop</span>, island-wide in 1–3 days
+          <div className="mt-8 rounded-lg border border-gray-200 bg-white p-4 text-xs text-gray-700 shadow-sm space-y-2">
+            <p className="flex items-center gap-2">
+              <span>🚚</span>
+              <span>
+                Insured express delivery by <span className="font-semibold text-brand">SwiftDrop</span>, island-wide in 1–3 days
+              </span>
             </p>
-            <p>💵 Cash on Delivery (COD) available</p>
-            <p>📍 Real-time GPS/checkpoint tracking after dispatch</p>
+            <p className="flex items-center gap-2">
+              <span>💵</span>
+              <span>Cash on Delivery (COD) · Inspect item before paying courier</span>
+            </p>
+            <p className="flex items-center gap-2">
+              <span>🛡️</span>
+              <span>1-Year Movement & Craftsmanship Warranty included</span>
+            </p>
+            <p className="flex items-center gap-2">
+              <span>📍</span>
+              <span>Real-time GPS & checkpoint tracking after dispatch</span>
+            </p>
           </div>
         </div>
       </div>
 
       {related.length > 0 && (
-        <section className="mt-14 border-t border-gray-200 pt-8">
-          <h2 className="text-xl font-bold text-gray-900">You may also like</h2>
-          <div className="mt-4 grid grid-cols-2 gap-4 md:grid-cols-4">
+        <section className="mt-16 border-t border-gray-200 pt-10">
+          <h2 className="text-xl font-bold text-gray-900">Complementary Timepieces</h2>
+          <div className="mt-6 grid grid-cols-2 gap-6 md:grid-cols-4">
             {related.map((p) => (
               <ProductCard key={p.id} product={p} />
             ))}
@@ -89,4 +106,3 @@ export default async function ProductPage({
     </div>
   );
 }
-

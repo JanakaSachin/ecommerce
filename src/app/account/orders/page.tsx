@@ -45,7 +45,7 @@ export default async function MyOrdersPage() {
       ) : (
         <div className="mt-6 space-y-3">
           {orders.map((o) => {
-            const pairs = o.items.reduce((sum, item) => sum + item.quantity, 0);
+            const itemCount = o.items.reduce((sum, item) => sum + item.quantity, 0);
             const latestShipment = o.shipments[0];
             const productNames = o.items
               .map((item) => item.variant.product.name)
@@ -65,7 +65,7 @@ export default async function MyOrdersPage() {
                 <div className="flex-1 text-sm text-gray-700">
                   <p className="line-clamp-1 font-medium">{productNames}</p>
                   <p className="text-xs text-gray-500">
-                    {pairs} pair{pairs > 1 ? "s" : ""} · {o.city}, {o.district}
+                    {itemCount} item{itemCount > 1 ? "s" : ""} · {o.city}, {o.district}
                     {latestShipment?.trackingNumber && (
                       <>
                         {" "}·{" "}

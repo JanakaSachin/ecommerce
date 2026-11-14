@@ -152,13 +152,13 @@ export default function CheckoutForm({ items, subtotal, pickupDistrict = "Colomb
           </label>
         </div>
 
-        <div className="rounded-lg bg-amber-50 p-3 text-sm text-amber-800">
-          💵 Payment Method: <b>Cash on Delivery</b>. Pay the SwiftDrop courier when your shoes arrive.
+        <div className="rounded-lg bg-amber-50 p-3 text-sm text-amber-800 border border-amber-200">
+          💵 Payment Method: <b>Cash on Delivery (COD)</b>. Inspect your timepiece upon delivery and pay the SwiftDrop courier in cash.
         </div>
 
         <button
           disabled={placing || quoting || !quote}
-          className="w-full rounded-md bg-indigo-600 py-3 font-semibold text-white hover:bg-indigo-700 disabled:opacity-50"
+          className="w-full rounded-md bg-accent py-3 font-semibold text-white transition hover:bg-accent-dark disabled:opacity-50 shadow-sm"
         >
           {placing
             ? "Placing order..."

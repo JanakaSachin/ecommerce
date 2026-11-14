@@ -89,7 +89,7 @@ export async function placeOrder(_prev: CheckoutState, formData: FormData): Prom
   }
   if (itemCount > MAX_PAIRS_PER_PARCEL) {
     return {
-      errors: { form: `We can ship at most ${MAX_PAIRS_PER_PARCEL} pairs per order.` },
+      errors: { form: `We can ship at most ${MAX_PAIRS_PER_PARCEL} watches per order.` },
       values,
     };
   }
@@ -156,7 +156,7 @@ export async function placeOrder(_prev: CheckoutState, formData: FormData): Prom
             dropoffZoneId: zone.id,
             parcelSize: size,
             weightGrams,
-            description: `Shoes x${itemCount} (order #${order.orderNumber})`,
+            description: `Watches x${itemCount} (order #${order.orderNumber})`,
           },
           select: { id: true },
         });
