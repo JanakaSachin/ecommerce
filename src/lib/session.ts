@@ -36,3 +36,4 @@ export async function requireAdmin(): Promise<SessionPayload> {
   if (session.role !== "ADMIN") redirect("/");
   return session;
 }
+

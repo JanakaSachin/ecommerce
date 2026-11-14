@@ -42,8 +42,12 @@ export function toStatusDTO(
   };
 }
 
-export const isFinal = (dto: OrderStatusDTO): boolean => {
-  const s = dto.shipment?.state;
+export const isFinal = (input: OrderStatusDTO | string | null | undefined): boolean => {
+  if (!input) return false;
+  if (typeof input === "string") {
+    return input === "DELIVERED" || input === "FAILED";
+  }
+  const s = input.shipment?.state;
   return s === "DELIVERED" || s === "FAILED";
 };
 
@@ -130,3 +134,4 @@ export function statusBadge(state?: string, deliveryStatus?: string | null) {
       return { label: "Processing", cls: "bg-gray-100 text-gray-800" };
   }
 }
+

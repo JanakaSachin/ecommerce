@@ -81,3 +81,4 @@ describe("booking create request builder (buildCreateRequest)", () => {
     expect(req.description).toBe("Shoes x2 (order #10045)");
   });
 });
+

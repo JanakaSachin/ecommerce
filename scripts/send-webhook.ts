@@ -84,3 +84,4 @@ try {
 } catch (e) {
   console.error(`[simulator] Request failed: ${(e as Error).message}`);
 }
+

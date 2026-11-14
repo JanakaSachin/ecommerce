@@ -106,3 +106,4 @@ With the status synchronization pipeline established, the project progresses to 
 3. `src/app/orders/[orderNumber]/page.tsx` & `LiveOrderStatus.tsx`: 10-second auto-polling customer order page.
 4. `scripts/sync-zones.ts`: Live zone synchronization tool logging into ERP as merchant user.
 5. `/admin`, `/admin/shipments`, `/admin/webhooks`, `/admin/zones`: Admin integration console with manual retry, manual poll, webhook audit viewer, and failure re-shipping action.
+

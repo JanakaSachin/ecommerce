@@ -131,3 +131,4 @@ With the core transaction pipeline and booking engine operational, the project p
 4. `src/lib/swiftdrop/poller.ts`: Background poller fetching public tracking data.
 5. `src/app/api/cron/swiftdrop/route.ts` & `scripts/cron-local.ts`: Authenticated background cron scheduler.
 6. `scripts/send-webhook.ts`: Webhook simulator for local development.
+

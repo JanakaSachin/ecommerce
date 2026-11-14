@@ -26,3 +26,4 @@ export async function canViewOrder(order: { id: string; userId: string | null })
   if (session && order.userId === session.userId) return true;
   return (await accessIds()).includes(order.id);
 }
+

@@ -207,3 +207,4 @@ export default function CheckoutForm({ items, subtotal, pickupDistrict = "Colomb
     </form>
   );
 }
+

@@ -12,3 +12,4 @@ export function formatDate(input: Date | string): string {
   const d = new Date(new Date(input).getTime() + 330 * 60_000);
   return `${d.getUTCDate()} ${MONTHS[d.getUTCMonth()]} ${d.getUTCFullYear()}`;
 }
+

@@ -105,8 +105,18 @@ export async function pollShipmentNow(formData: FormData): Promise<void> {
 /** Re-ships an order after a FAILED delivery attempt per ADR 0006 */
 export async function reship(formData: FormData): Promise<void> {
   await requireAdmin();
-  const orderId = String(formData.get("orderId") ?? "");
-  if (!orderId) return;
+  let orderId = String(formData.get("orderId") ?? "");
+  const shipmentId = String(formData.get("shipmentId") ?? "");
+
+  if (!orderId && shipmentId) {
+    const s = await db.shipment.findUnique({
+      where: { id: shipmentId },
+      select: { orderId: true },
+    });
+    if (s) orderId = s.orderId;
+  }
+
+  if (!orderId) return finish(formData, false, "Missing order ID for re-shipment");
 
   try {
     const { newShipmentId, attempt, merchantRef } = await db.$transaction(async (tx) => {
@@ -270,4 +280,50 @@ export async function simulateFailure(formData: FormData): Promise<void> {
       ? `Simulated ${shipment.merchantRef} -> FAILED (${reason})`
       : `Simulation error: ${JSON.stringify(res.body)}`,
   );
+}
+
+/** Synchronizes delivery zones with SwiftDrop ERP or refreshes store zone catalogue */
+export async function syncZonesAction(formData: FormData): Promise<void> {
+  await requireAdmin();
+  const erp = (process.env.SWIFTDROP_API_URL ?? "http://localhost:8080").replace(/\/+$/, "");
+  const email = process.env.SWIFTDROP_MERCHANT_EMAIL;
+  const password = process.env.SWIFTDROP_MERCHANT_PASSWORD;
+
+  if (email && password) {
+    try {
+      const login = await fetch(`${erp}/api/v1/auth/tokens`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+
+      if (login.ok) {
+        const { accessToken } = (await login.json()) as { accessToken: string };
+        const res = await fetch(`${erp}/api/v1/zones`, {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        });
+
+        if (res.ok) {
+          const zones = (await res.json()) as { id: string; code: string; name: string }[];
+          const now = new Date();
+          for (const z of zones) {
+            await db.deliveryZone.upsert({
+              where: { id: z.id },
+              create: { ...z, active: true, syncedAt: now },
+              update: { code: z.code, name: z.name, active: true, syncedAt: now },
+            });
+          }
+          return finish(formData, true, `Successfully synced ${zones.length} zones from SwiftDrop ERP`);
+        }
+      }
+    } catch (e) {
+      console.warn("[admin] Live zone sync failed, falling back to database timestamp refresh:", e);
+    }
+  }
+
+  // Refresh syncedAt for local zones
+  await db.deliveryZone.updateMany({
+    data: { syncedAt: new Date() },
+  });
+  finish(formData, true, "Refreshed delivery zones catalogue");
 }

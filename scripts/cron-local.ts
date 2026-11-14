@@ -18,3 +18,4 @@ async function tick() {
 console.log(`[cron] Starting local runner targeting ${url}...`);
 tick();
 setInterval(tick, 60_000);
+

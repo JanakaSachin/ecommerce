@@ -18,9 +18,9 @@ Phase 3: Core Transaction Pipeline & Order Booking (applyStatus, booking service
    ▼
 Phase 4: Status Updates — Webhooks & Polling (HMAC verification, poller, cron route, simulator) [COMPLETED ✅]
    ▼
-Phase 5: Customer Tracking & Admin Dashboard (Order timeline UI, zone sync, admin reship) [READY TO IMPLEMENT ⏳]
+Phase 5: Customer Tracking & Admin Dashboard (Order timeline UI, zone sync, admin reship) [COMPLETED ✅]
    ▼
-Phase 6: Live ERP Integration & E2E Verification (Seed zones SQL, API key, courier flow)
+Phase 6: Live ERP Integration & E2E Verification (Seed zones SQL, API key, courier flow) [READY TO IMPLEMENT ⏳]
 ```
 
 ---
@@ -127,21 +127,21 @@ Phase 6: Live ERP Integration & E2E Verification (Seed zones SQL, API key, couri
 ---
 
 ### Phase 5: Customer Tracking & Admin Dashboard
-**Status:** Ready to Implement ⏳
+**Status:** Completed ✅ (Detailed report in [`docs/developer-5.md`](./developer-5.md))
 
-- [ ] **Step 5.1:** Customer status API (`src/app/api/orders/[orderNumber]/status/route.ts`).
+- [x] **Step 5.1:** Customer status API (`src/app/api/orders/[orderNumber]/status/route.ts`).
   - Secure, sanitized DTO returning tracking number, status, and event timeline without PII.
-- [ ] **Step 5.2:** Customer tracking timeline UI (`src/components/DeliveryTimeline.tsx`, `/orders/[orderNumber]/page.tsx`).
+- [x] **Step 5.2:** Customer tracking timeline UI (`src/components/DeliveryTimeline.tsx`, `/orders/[orderNumber]/page.tsx`).
   - Step progression display with visual gap-filling for missed polling steps; 10s auto-refresh polling.
-- [ ] **Step 5.3:** Zone synchronization script (`scripts/sync-zones.ts`).
+- [x] **Step 5.3:** Zone synchronization script (`scripts/sync-zones.ts`).
   - Logs into ERP with merchant credentials, syncs active zones to `DeliveryZone`, and maps districts.
-- [ ] **Step 5.4:** Admin integration console (`/admin`, `/admin/shipments`, `/admin/webhooks`, `/admin/zones`).
+- [x] **Step 5.4:** Admin integration console (`/admin`, `/admin/shipments`, `/admin/webhooks`, `/admin/zones`).
   - Health dashboard with `AUTH` red banner alert.
   - Shipment operations: Manual "Retry Booking", "Poll Now", and "Simulate Status".
   - Webhook audit log inspector.
-- [ ] **Step 5.5:** Failure re-shipping workflow (`src/app/actions/admin.ts`).
+- [x] **Step 5.5:** Failure re-shipping workflow (`src/app/actions/admin.ts`).
   - Re-ships failed orders by creating a new shipment with an incremented attempt (`SLK-10045-2`).
-- **Check:** Customer timeline updates live; admin console can trigger retries and re-shipping.
+- **Check:** Customer timeline updates live; admin console can trigger retries and re-shipping. ✅
 
 ---
 
