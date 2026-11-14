@@ -11,7 +11,7 @@ export default function FormField({ label, error, className, ...props }: Props) 
       <span className="text-gray-600">{label}</span>
       <input
         {...props}
-        className={`rounded-md border px-3 py-2 outline-none focus:border-indigo-600 ${
+        className={`rounded-md border px-3 py-2 outline-none focus:border-accent ${
           error ? "border-red-500" : "border-gray-300"
         } ${className ?? ""}`}
       />

@@ -136,21 +136,21 @@ export function statusBadge(state?: string, deliveryStatus?: string | null) {
   }
   switch (deliveryStatus) {
     case "DELIVERED":
-      return { label: "Delivered", cls: "bg-green-100 text-green-800" };
+      return { label: "Delivered", cls: "bg-teal-100 text-teal-900 border border-teal-300" };
     case "FAILED":
-      return { label: "Delivery unsuccessful", cls: "bg-red-100 text-red-700" };
+      return { label: "Delivery unsuccessful", cls: "bg-red-100 text-red-800 border border-red-200" };
     case "OUT_FOR_DELIVERY":
-      return { label: "Out for delivery", cls: "bg-orange-100 text-orange-800" };
+      return { label: "Out for delivery", cls: "bg-emerald-100 text-emerald-900 border border-emerald-300" };
     case "IN_TRANSIT":
-      return { label: "In transit", cls: "bg-blue-100 text-blue-800" };
+      return { label: "In transit", cls: "bg-cyan-100 text-cyan-900 border border-cyan-300" };
     case "PICKED_UP":
-      return { label: "Picked up", cls: "bg-indigo-100 text-indigo-800" };
+      return { label: "Picked up", cls: "bg-teal-50 text-teal-800 border border-teal-200" };
     case "PAUSED":
-      return { label: "On hold", cls: "bg-amber-100 text-amber-800" };
+      return { label: "On hold", cls: "bg-amber-100 text-amber-800 border border-amber-200" };
     case "CANCELLED":
       return { label: "Cancelled", cls: "bg-gray-200 text-gray-700" };
     case "CREATED":
-      return { label: "Booked with SwiftDrop", cls: "bg-purple-100 text-purple-800" };
+      return { label: "Booked with SwiftDrop", cls: "bg-teal-50 text-teal-900 border border-teal-200" };
     default:
       return { label: "Processing", cls: "bg-gray-100 text-gray-800" };
   }

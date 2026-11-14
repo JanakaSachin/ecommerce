@@ -19,24 +19,24 @@ export default async function HomePage() {
 
   return (
     <div>
-      {/* Hero Banner */}
+      {/* Hero Banner - Bluish Green Luxury Aesthetic */}
       <section className="relative h-[480px] overflow-hidden bg-brand-dark">
         <Image
           src="/hero.jpg"
           alt="Luxury Watches StrideLK"
           fill
           priority
-          className="object-cover opacity-80"
+          className="object-cover opacity-75"
         />
-        <div className="absolute inset-0 bg-gradient-to-r from-brand/95 via-brand/80 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-r from-brand-dark/95 via-brand/85 to-transparent" />
         <div className="relative mx-auto flex h-full max-w-7xl flex-col justify-center px-4 text-white">
-          <p className="font-semibold uppercase tracking-widest text-accent text-xs">
+          <p className="font-semibold uppercase tracking-widest text-teal-300 text-xs">
             Precision & Heritage Timepieces
           </p>
-          <h1 className="mt-2 max-w-xl text-4xl font-extrabold tracking-tight md:text-5xl lg:text-6xl">
+          <h1 className="mt-2 max-w-xl text-4xl font-extrabold tracking-tight md:text-5xl lg:text-6xl text-white">
             Every second counts. Delivered to your door.
           </h1>
-          <p className="mt-4 max-w-lg text-gray-200 text-sm md:text-base leading-relaxed">
+          <p className="mt-4 max-w-lg text-teal-100 text-sm md:text-base leading-relaxed">
             Curated mechanical, automatic, and chronograph timepieces. Fully insured island-wide delivery powered by SwiftDrop. Pay safely with Cash on Delivery.
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
@@ -56,8 +56,8 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* Trust Badges */}
-      <section className="border-b border-gray-200 bg-white">
+      {/* Trust Badges Strip */}
+      <section className="border-b border-teal-100/60 bg-white">
         <div className="mx-auto grid max-w-7xl gap-4 px-4 py-6 text-center text-sm md:grid-cols-3">
           <p className="text-gray-700">
             <span className="font-bold text-brand">Insured Island-wide Delivery</span> · all 25 districts
@@ -71,14 +71,14 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* Collections Grid */}
+      {/* Curated Collections Grid */}
       <section className="mx-auto max-w-7xl px-4 py-12">
         <div className="flex items-end justify-between">
           <div>
             <p className="text-xs font-semibold uppercase tracking-wider text-accent">Browse by Style</p>
             <h2 className="mt-1 text-2xl font-bold text-gray-900">Curated Collections</h2>
           </div>
-          <Link href="/products" className="text-sm font-semibold text-accent hover:underline">
+          <Link href="/products" className="text-sm font-semibold text-accent hover:text-accent-dark hover:underline">
             All Watches →
           </Link>
         </div>
@@ -88,7 +88,7 @@ export default async function HomePage() {
             <Link
               key={c.id}
               href={`/category/${c.slug}`}
-              className="group relative aspect-square overflow-hidden rounded-lg bg-gray-900 shadow-sm"
+              className="group relative aspect-square overflow-hidden rounded-lg bg-gray-900 shadow-sm border border-gray-100"
             >
               <Image
                 src={c.products[0]?.imageUrl || "/watches/watch-01.jpg"}
@@ -99,14 +99,14 @@ export default async function HomePage() {
               />
               <div className="absolute inset-0 flex flex-col justify-end bg-gradient-to-t from-black/85 via-black/30 to-transparent p-3">
                 <span className="font-bold text-white text-sm">{c.name}</span>
-                <span className="text-[10px] text-gray-300">View collection →</span>
+                <span className="text-[10px] text-teal-200">View collection →</span>
               </div>
             </Link>
           ))}
         </div>
       </section>
 
-      {/* Featured Timepieces */}
+      {/* Featured Timepieces Grid */}
       <section className="mx-auto max-w-7xl px-4 pb-16">
         <div className="flex items-end justify-between border-b border-gray-200 pb-4">
           <div>
@@ -115,7 +115,7 @@ export default async function HomePage() {
           </div>
           <Link
             href="/products"
-            className="text-sm font-semibold text-accent hover:underline"
+            className="text-sm font-semibold text-accent hover:text-accent-dark hover:underline"
           >
             View all ({featured.length}) →
           </Link>

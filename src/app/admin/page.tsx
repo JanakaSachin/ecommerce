@@ -104,7 +104,7 @@ export default async function AdminDashboardPage({ searchParams }: { searchParam
         </div>
         <div className="rounded-lg bg-white p-4 shadow-sm border border-gray-100">
           <p className="text-xs uppercase font-semibold text-gray-500">In Courier Transit</p>
-          <p className="mt-2 text-2xl font-bold text-blue-600">{booked}</p>
+          <p className="mt-2 text-2xl font-bold text-teal-700">{booked}</p>
           <p className="text-xs text-gray-400 mt-1">Active tracking</p>
         </div>
         <div className="rounded-lg bg-white p-4 shadow-sm border border-gray-100">

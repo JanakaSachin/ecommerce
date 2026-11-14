@@ -21,7 +21,7 @@ export default function ProductCard({ product }: Props) {
   return (
     <Link
       href={`/products/${product.slug}`}
-      className="group flex flex-col overflow-hidden rounded-lg bg-white shadow-sm transition hover:shadow-md border border-gray-100"
+      className="group flex flex-col overflow-hidden rounded-lg bg-white shadow-sm transition duration-300 hover:shadow-lg border border-gray-100 hover:border-teal-300/50"
     >
       <div className="relative aspect-square bg-gray-50 overflow-hidden">
         <Image
@@ -32,14 +32,14 @@ export default function ProductCard({ product }: Props) {
           className="object-cover transition duration-500 group-hover:scale-105"
         />
         {!inStock && (
-          <span className="absolute left-2 top-2 rounded bg-gray-900/90 px-2 py-0.5 text-xs font-medium text-white backdrop-blur-sm">
+          <span className="absolute left-2.5 top-2.5 rounded bg-gray-900/90 px-2 py-0.5 text-xs font-medium text-white backdrop-blur-sm">
             Sold out
           </span>
         )}
       </div>
       <div className="flex flex-1 flex-col p-4">
         {product.category && (
-          <p className="text-[11px] font-semibold uppercase tracking-wider text-gray-500">
+          <p className="text-[11px] font-bold uppercase tracking-wider text-accent">
             {product.category.name}
           </p>
         )}
@@ -47,8 +47,8 @@ export default function ProductCard({ product }: Props) {
           {product.name}
         </h3>
         <div className="mt-auto pt-3 flex items-center justify-between">
-          <p className="text-base font-bold text-accent">{formatLKR(product.basePrice)}</p>
-          <span className="text-xs text-brand font-medium group-hover:underline">View →</span>
+          <p className="text-base font-bold text-brand">{formatLKR(product.basePrice)}</p>
+          <span className="text-xs text-accent font-semibold group-hover:underline">View →</span>
         </div>
       </div>
     </Link>

@@ -29,20 +29,20 @@ export default function DeliveryTimeline({ data }: { data: OrderStatusDTO }) {
                 ? "bg-gray-500 text-white"
                 : s.state === "upcoming"
                   ? "bg-gray-200 text-gray-400"
-                  : "bg-indigo-600 text-white";
+                  : "bg-brand text-white";
 
         return (
           <li key={s.status} className="relative flex gap-4 pb-6 last:pb-0">
             {!last && (
               <span
                 className={`absolute left-[11px] top-6 h-full w-0.5 ${
-                  lineDone ? "bg-indigo-600" : "bg-gray-200"
+                  lineDone ? "bg-accent" : "bg-gray-200"
                 }`}
               />
             )}
             <span
               className={`relative z-10 flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-bold ${dot} ${
-                s.state === "current" ? "ring-4 ring-indigo-200" : ""
+                s.state === "current" ? "ring-4 ring-teal-200" : ""
               }`}
             >
               {s.state === "failed" || s.state === "cancelled"

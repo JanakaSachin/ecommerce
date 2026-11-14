@@ -205,7 +205,7 @@ export default async function AdminShipmentsPage({ searchParams }: { searchParam
                             <input type="hidden" name="shipmentId" value={s.id} />
                             <button
                               type="submit"
-                              className="rounded bg-blue-600 px-2 py-1 text-xs font-medium text-white hover:bg-blue-700"
+                              className="rounded bg-teal-600 px-2 py-1 text-xs font-medium text-white hover:bg-teal-700"
                             >
                               Poll
                             </button>
@@ -219,7 +219,7 @@ export default async function AdminShipmentsPage({ searchParams }: { searchParam
                               <input type="hidden" name="shipmentId" value={s.id} />
                               <button
                                 type="submit"
-                                className="rounded bg-indigo-600 px-2 py-1 text-xs font-medium text-white hover:bg-indigo-700"
+                                className="rounded bg-teal-700 px-2 py-1 text-xs font-medium text-white hover:bg-teal-800"
                               >
                                 Next ▶
                               </button>

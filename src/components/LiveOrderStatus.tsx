@@ -76,7 +76,7 @@ export default function LiveOrderStatus({ initial }: { initial: OrderStatusDTO }
               ),
             }
           : {
-              cls: "border-indigo-200 bg-indigo-50 text-indigo-800",
+              cls: "border-teal-200 bg-teal-50 text-teal-900",
               text: (
                 <>
                   ✅ <b>Order #{n} confirmed.</b> Dispatched with SwiftDrop.

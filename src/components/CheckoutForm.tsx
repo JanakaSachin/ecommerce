@@ -14,7 +14,7 @@ type Props = {
   defaults: { customerName?: string; email?: string; phone?: string };
 };
 
-const inputStyle = "rounded-md border px-3 py-2 outline-none focus:border-indigo-600";
+const inputStyle = "rounded-md border px-3 py-2 outline-none focus:border-accent";
 
 export default function CheckoutForm({ items, subtotal, pickupDistrict = "Colombo", defaults }: Props) {
   const [state, action, placing] = useActionState<CheckoutState, FormData>(placeOrder, undefined);
@@ -152,7 +152,7 @@ export default function CheckoutForm({ items, subtotal, pickupDistrict = "Colomb
           </label>
         </div>
 
-        <div className="rounded-lg bg-amber-50 p-3 text-sm text-amber-800 border border-amber-200">
+        <div className="rounded-lg bg-teal-50/80 p-3.5 text-sm text-teal-900 border border-teal-200">
           💵 Payment Method: <b>Cash on Delivery (COD)</b>. Inspect your timepiece upon delivery and pay the SwiftDrop courier in cash.
         </div>
 
