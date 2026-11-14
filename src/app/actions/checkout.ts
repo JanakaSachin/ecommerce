@@ -27,8 +27,8 @@ export type DeliveryQuote = {
 } | null;
 
 class OutOfStockError extends Error {
-  constructor(productName: string, sizeUk: string) {
-    super(`${productName} (UK ${sizeUk})`);
+  constructor(productName: string, variantName: string) {
+    super(`${productName} (${variantName})`);
     this.name = "OutOfStockError";
   }
 }
@@ -117,7 +117,7 @@ export async function placeOrder(_prev: CheckoutState, formData: FormData): Prom
             data: { stock: { decrement: item.quantity } },
           });
           if (res.count === 0) {
-            throw new OutOfStockError(item.variant.product.name, item.variant.sizeUk);
+            throw new OutOfStockError(item.variant.product.name, item.variant.name);
           }
         }
 
@@ -139,10 +139,9 @@ export async function placeOrder(_prev: CheckoutState, formData: FormData): Prom
             items: {
               create: items.map((i) => ({
                 variantId: i.variantId,
-                productName: i.variant.product.name,
-                sizeUk: i.variant.sizeUk,
-                unitPrice: i.variant.product.price,
                 quantity: i.quantity,
+                unitPrice: i.variant.price,
+                lineTotal: i.variant.price * i.quantity,
               })),
             },
           },

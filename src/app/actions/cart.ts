@@ -21,7 +21,7 @@ export async function addToCart(_prev: CartActionState, formData: FormData): Pro
   const { variantId, quantity } = parsed.data;
 
   const variant = await db.productVariant.findUnique({ where: { id: variantId }, include: { product: true } });
-  if (!variant || !variant.product.isActive) return { ok: false, message: "This product is not available" };
+  if (!variant) return { ok: false, message: "This product is not available" };
 
   const cartId = await getOrCreateCartId();
   const existing = await db.cartItem.findUnique({ where: { cartId_variantId: { cartId, variantId } } });
@@ -32,7 +32,7 @@ export async function addToCart(_prev: CartActionState, formData: FormData): Pro
     return {
       ok: false,
       message:
-        `Only ${variant.stock} left in UK ${variant.sizeUk}` +
+        `Only ${variant.stock} left for ${variant.name}` +
         (existing ? ` (you already have ${existing.quantity} in your cart)` : ""),
     };
   }
@@ -45,7 +45,7 @@ export async function addToCart(_prev: CartActionState, formData: FormData): Pro
   });
 
   revalidatePath("/", "layout"); // refresh the header cart count
-  return { ok: true, message: `Added ${variant.product.name} (UK ${variant.sizeUk}) to your cart` };
+  return { ok: true, message: `Added ${variant.product.name} (${variant.name}) to your cart` };
 }
 
 export async function updateCartItem(formData: FormData): Promise<void> {

@@ -21,7 +21,7 @@ export type CartWithItems = Prisma.CartGetPayload<{ include: typeof cartInclude 
 export async function findCartId(): Promise<string | null> {
   const session = await getSession();
   if (session) {
-    const cart = await db.cart.findUnique({ where: { userId: session.userId }, select: { id: true } });
+    const cart = await db.cart.findFirst({ where: { userId: session.userId }, select: { id: true } });
     return cart?.id ?? null;
   }
   const id = (await cookies()).get(CART_COOKIE)?.value;
@@ -35,12 +35,10 @@ export async function findCartId(): Promise<string | null> {
 export async function getOrCreateCartId(): Promise<string> {
   const session = await getSession();
   if (session) {
-    const cart = await db.cart.upsert({
-      where: { userId: session.userId },
-      update: {},
-      create: { userId: session.userId },
-    });
-    return cart.id;
+    const existing = await db.cart.findFirst({ where: { userId: session.userId }, select: { id: true } });
+    if (existing) return existing.id;
+    const created = await db.cart.create({ data: { userId: session.userId }, select: { id: true } });
+    return created.id;
   }
 
   const existing = await findCartId();
@@ -72,9 +70,9 @@ export async function cartCount(): Promise<number> {
 
 export function summarizeCart(cart: CartWithItems | null) {
   const items = cart?.items ?? [];
-  const subtotal = items.reduce((sum, i) => sum + i.variant.product.price * i.quantity, 0);
+  const subtotal = items.reduce((sum, i) => sum + i.variant.price * i.quantity, 0);
   const itemCount = items.reduce((sum, i) => sum + i.quantity, 0);
-  const hasStockIssue = items.some((i) => i.quantity > i.variant.stock || !i.variant.product.isActive);
+  const hasStockIssue = items.some((i) => i.quantity > i.variant.stock);
   return { items, subtotal, itemCount, hasStockIssue };
 }
 
@@ -95,7 +93,7 @@ export async function mergeGuestCart(userId: string): Promise<void> {
     return;
   }
 
-  const userCart = await db.cart.findUnique({ where: { userId } });
+  const userCart = await db.cart.findFirst({ where: { userId } });
 
   // User had no cart yet: just hand the guest cart over
   if (!userCart) {

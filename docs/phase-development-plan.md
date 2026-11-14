@@ -14,11 +14,11 @@ Phase 1: Environment, DB & Project Setup (Ports 3100 / 5434, Prisma schema, Seed
    ▼
 Phase 2: Domain Utilities & SwiftDrop Abstraction (Types, Status rules, Mock/Live clients, Vitest) [COMPLETED ✅]
    ▼
-Phase 3: Core Transaction Pipeline & Order Booking (applyStatus, booking service, Checkout action) [READY TO IMPLEMENT ⏳]
+Phase 3: Core Transaction Pipeline & Order Booking (applyStatus, booking service, Checkout action) [COMPLETED ✅]
    ▼
-Phase 4: Status Updates — Webhooks & Polling (HMAC verification, poller, cron route, simulator)
+Phase 4: Status Updates — Webhooks & Polling (HMAC verification, poller, cron route, simulator) [COMPLETED ✅]
    ▼
-Phase 5: Customer Tracking & Admin Dashboard (Order timeline UI, zone sync, admin reship)
+Phase 5: Customer Tracking & Admin Dashboard (Order timeline UI, zone sync, admin reship) [READY TO IMPLEMENT ⏳]
    ▼
 Phase 6: Live ERP Integration & E2E Verification (Seed zones SQL, API key, courier flow)
 ```
@@ -82,51 +82,52 @@ Phase 6: Live ERP Integration & E2E Verification (Seed zones SQL, API key, couri
 ---
 
 ### Phase 3: Core Transaction Pipeline & Order Booking
-**Status:** Ready to Implement ⏳
+**Status:** Completed ✅ (Detailed report in [`docs/developer-3.md`](./developer-3.md))
 
-- [ ] **Step 3.1:** State mutation engine (`src/lib/swiftdrop/apply-status.ts`).
+- [x] **Step 3.1:** State mutation engine (`src/lib/swiftdrop/apply-status.ts`).
   - Row locking via `SELECT ... FOR UPDATE` to avoid webhook/poller race conditions.
   - Append-only delivery timeline event creation with duplicate skipping.
   - Status progression updating shipment state (`BOOKED`, `DELIVERED`, `FAILED`).
-- [ ] **Step 3.2:** Shipment booking service (`src/lib/swiftdrop/booking.ts`).
+- [x] **Step 3.2:** Shipment booking service (`src/lib/swiftdrop/booking.ts`).
   - `buildCreateRequest`: Prepares ERP order payload from shipment and order snapshot.
   - `bookShipment`: Leases shipment (60s lease), invokes client, records tracking number or schedules backoff retry.
   - `retryDueBookings`: Processes due retryable shipments.
-- [ ] **Step 3.3:** Store core components porting.
-  - Session and authentication (`src/lib/session.ts`, `src/app/actions/auth.ts`).
+- [x] **Step 3.3:** Store core components porting.
+  - Session and authentication (`src/lib/session.ts`, `src/app/actions/auth.ts`, `src/lib/jwt.ts`).
   - Shopping cart (`src/lib/cart.ts`, `src/app/actions/cart.ts`).
-- [ ] **Step 3.4:** Checkout server action (`src/app/actions/checkout.ts`).
+  - Route protection & access (`src/middleware.ts`, `src/lib/order-access.ts`, `src/lib/catalog.ts`).
+- [x] **Step 3.4:** Checkout server action (`src/app/actions/checkout.ts`).
   - Atomic transaction: Stock reservation + Order creation + Shipment creation (`PENDING_BOOKING`).
   - Background asynchronous dispatch via Next.js `after(() => bookShipment(shipmentId))`.
-- [ ] **Step 3.5:** Checkout UI adjustments (`components/CheckoutForm.tsx`).
+- [x] **Step 3.5:** Checkout UI adjustments (`src/components/CheckoutForm.tsx`).
   - Remove express delivery; validate phone format and postal code; dynamic fee recalculation.
-- **Check:** Placing an order in mock mode immediately transitions shipment to `BOOKED` with a tracking number.
+- **Check:** `npm test` passed 11/11 test files (61/61 tests); `npm run lint` passed; `npm run build` compiled successfully. ✅
 
 ---
 
 ### Phase 4: Status Updates — Webhooks & Polling
-**Status:** Pending
+**Status:** Completed ✅ (Detailed report in [`docs/developer-4.md`](./developer-4.md))
 
-- [ ] **Step 4.1:** HMAC-SHA256 signature verification (`src/lib/swiftdrop/signature.ts`).
+- [x] **Step 4.1:** HMAC-SHA256 signature verification (`src/lib/swiftdrop/signature.ts`).
   - `signV1` and `verifyV1` with 5-minute replay tolerance window and `timingSafeEqual`.
-- [ ] **Step 4.2:** Webhook handler & deduplication (`src/lib/swiftdrop/webhook.ts`).
+- [x] **Step 4.2:** Webhook handler & deduplication (`src/lib/swiftdrop/webhook.ts`).
   - Raw event logging in `WebhookLog`.
   - Transactional event claim on unique `eventId`.
   - Forward status update via `applyStatus`.
-- [ ] **Step 4.3:** Webhook API endpoint (`src/app/api/webhooks/swiftdrop/route.ts`).
+- [x] **Step 4.3:** Webhook API endpoint (`src/app/api/webhooks/swiftdrop/route.ts`).
   - Node.js runtime, raw body stream reading (`req.text()`), 64KB limit, signature verification.
-- [ ] **Step 4.4:** Webhook simulation script (`scripts/send-webhook.ts`).
-  - CLI script generating signed webhook payloads to simulate ERP status changes.
-- [ ] **Step 4.5:** Tracking poller service (`src/lib/swiftdrop/poller.ts`).
+- [x] **Step 4.4:** Tracking poller service (`src/lib/swiftdrop/poller.ts`).
   - Queries active shipments past polling interval; fetches public tracking; chronologically applies history.
-- [ ] **Step 4.6:** Cron endpoint & local runner (`src/app/api/cron/swiftdrop/route.ts`, `scripts/cron-local.ts`).
+- [x] **Step 4.5:** Cron endpoint & local runner (`src/app/api/cron/swiftdrop/route.ts`, `scripts/cron-local.ts`).
   - Authenticated endpoint invoking `retryDueBookings` and `pollOpenShipments`.
-- **Check:** Webhook simulator moves orders through status steps; polling syncs public tracking; repeated events return `duplicate: true`.
+- [x] **Step 4.6:** Webhook simulation script (`scripts/send-webhook.ts`).
+  - CLI script generating signed webhook payloads to simulate ERP status changes.
+- **Check:** `npm test` passed 12/12 test files (63/63 tests); `npm run lint` passed; `npm run build` compiled `/api/webhooks/swiftdrop` and `/api/cron/swiftdrop` successfully. ✅
 
 ---
 
 ### Phase 5: Customer Tracking & Admin Dashboard
-**Status:** Pending
+**Status:** Ready to Implement ⏳
 
 - [ ] **Step 5.1:** Customer status API (`src/app/api/orders/[orderNumber]/status/route.ts`).
   - Secure, sanitized DTO returning tracking number, status, and event timeline without PII.

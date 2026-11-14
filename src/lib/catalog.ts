@@ -32,20 +32,20 @@ export const productCardInclude = {
 } satisfies Prisma.ProductInclude;
 
 export async function findProducts(f: ProductFilters) {
-  const where: Prisma.ProductWhereInput = { isActive: true };
+  const where: Prisma.ProductWhereInput = {};
   if (f.q) where.name = { contains: f.q, mode: "insensitive" };
   if (f.category) where.category = { slug: f.category };
-  if (f.size) where.variants = { some: { sizeUk: f.size, stock: { gt: 0 } } };
+  if (f.size) where.variants = { some: { name: { contains: f.size }, stock: { gt: 0 } } };
 
   const min = Number(f.min);
   const max = Number(f.max);
-  if (min || max) where.price = { ...(min ? { gte: min } : {}), ...(max ? { lte: max } : {}) };
+  if (min || max) where.basePrice = { ...(min ? { gte: min } : {}), ...(max ? { lte: max } : {}) };
 
   const orderBy: Prisma.ProductOrderByWithRelationInput =
     f.sort === "price_asc"
-      ? { price: "asc" }
+      ? { basePrice: "asc" }
       : f.sort === "price_desc"
-        ? { price: "desc" }
+        ? { basePrice: "desc" }
         : f.sort === "name"
           ? { name: "asc" }
           : { createdAt: "desc" };

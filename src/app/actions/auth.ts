@@ -18,13 +18,13 @@ export async function register(_prev: AuthState, formData: FormData): Promise<Au
   const parsed = registerSchema.safeParse(raw);
   if (!parsed.success) return { errors: fieldErrors(parsed.error), values };
 
-  const { name, email, phone, password } = parsed.data;
+  const { name, email, password } = parsed.data;
   if (await db.user.findUnique({ where: { email } })) {
     return { errors: { email: "An account with this email already exists" }, values };
   }
 
   const user = await db.user.create({
-    data: { name, email, phone, passwordHash: await bcrypt.hash(password, 10) },
+    data: { name, email, passwordHash: await bcrypt.hash(password, 10) },
   });
 
   await createSession({ userId: user.id, email: user.email, name: user.name, role: user.role });
