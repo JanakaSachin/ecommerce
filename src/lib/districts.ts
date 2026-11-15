@@ -51,3 +51,12 @@ export const DISTRICT_LIST = (Object.entries(DISTRICTS) as [District, string][])
     province: PROVINCE_NAMES[code] ?? code,
   }),
 );
+
+/**
+ * SwiftDrop's seeded zone code for one of the store's province codes. SwiftDrop prefixes `LK-`, and
+ * spells two provinces differently: Uva is `LK-UP` and Sabaragamuwa is `LK-SGP`.
+ */
+export function swiftDropZoneCode(provinceCode: string): string {
+  const special: Record<string, string> = { UVA: "LK-UP", SAB: "LK-SGP" };
+  return special[provinceCode] ?? `LK-${provinceCode}`;
+}

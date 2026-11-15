@@ -1,11 +1,14 @@
 import "server-only";
 import type { SwiftDropClient } from "./client";
 import { SwiftDropError, kindForStatus } from "./errors";
+import { signRequestV1 } from "./signature";
 import {
   merchantOrderResponseSchema,
+  merchantOrderStatusSchema,
   publicTrackingSchema,
   type CreateMerchantOrderRequest,
   type MerchantOrderResponse,
+  type MerchantOrderStatus,
   type PublicTracking,
 } from "./types";
 
@@ -16,6 +19,7 @@ export class LiveSwiftDropClient implements SwiftDropClient {
     private readonly baseUrl: string,
     private readonly apiKey: string,
     private readonly timeoutMs: number,
+    private readonly signingSecret = "",
   ) {}
 
   private async send(
@@ -23,13 +27,28 @@ export class LiveSwiftDropClient implements SwiftDropClient {
     init: { method: string; body?: unknown; withKey?: boolean },
   ): Promise<Response> {
     const headers: Record<string, string> = { Accept: "application/json" };
-    if (init.body !== undefined) headers["Content-Type"] = "application/json";
-    if (init.withKey) headers["X-API-Key"] = this.apiKey; // only on /merchant-api/** calls
+    // Serialise once: the signature covers exactly the bytes that are sent.
+    const body = init.body === undefined ? undefined : JSON.stringify(init.body);
+    if (body !== undefined) headers["Content-Type"] = "application/json";
+    if (init.withKey) {
+      headers["X-API-Key"] = this.apiKey; // only on /merchant-api/** calls
+      if (this.signingSecret) {
+        const timestamp = String(Math.floor(Date.now() / 1000));
+        headers["X-SwiftDrop-Timestamp"] = timestamp;
+        headers["X-SwiftDrop-Signature"] = signRequestV1(
+          this.signingSecret,
+          timestamp,
+          init.method,
+          path.split("?")[0],
+          body ?? "",
+        );
+      }
+    }
     try {
       return await fetch(this.baseUrl.replace(/\/+$/, "") + path, {
         method: init.method,
         headers,
-        body: init.body === undefined ? undefined : JSON.stringify(init.body),
+        body,
         signal: AbortSignal.timeout(this.timeoutMs),
         cache: "no-store",
         redirect: "error",
@@ -68,6 +87,21 @@ export class LiveSwiftDropClient implements SwiftDropClient {
     // Safe to retry: the same reference returns the same parcel.
     if (!parsed.success) {
       throw new SwiftDropError("Unexpected create-order response shape", "RETRYABLE", res.status);
+    }
+    return parsed.data;
+  }
+
+  async getOrderStatus(merchantOrderReference: string): Promise<MerchantOrderStatus | null> {
+    const res = await this.send(
+      `/api/v1/merchant-api/orders/${encodeURIComponent(merchantOrderReference)}`,
+      { method: "GET", withKey: true },
+    );
+    if (res.status === 404) return null;
+    if (!res.ok) return this.fail(res);
+    const json = await res.json().catch(() => null);
+    const parsed = merchantOrderStatusSchema.safeParse(json);
+    if (!parsed.success) {
+      throw new SwiftDropError("Unexpected order-status response shape", "RETRYABLE", res.status);
     }
     return parsed.data;
   }

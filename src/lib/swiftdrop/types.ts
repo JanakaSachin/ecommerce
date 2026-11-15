@@ -68,6 +68,27 @@ export const publicTrackingSchema = z.object({
 });
 export type PublicTracking = z.infer<typeof publicTrackingSchema>;
 
+/** ERP: merchant.web.MerchantOrderStatusResponse (GET /api/v1/merchant-api/orders/{ref}). */
+export const merchantOrderStatusSchema = z.object({
+  parcelId: z.string().uuid(),
+  trackingNumber: z.string(),
+  merchantOrderReference: z.string(),
+  status: z.enum(PARCEL_STATUSES),
+  lastSequence: z.number().int().min(0),
+  createdAt: isoDate,
+  events: z.array(
+    z.object({
+      sequence: z.number().int().min(1),
+      eventId: z.string().uuid(),
+      status: z.enum(PARCEL_STATUSES),
+      previousStatus: z.enum(PARCEL_STATUSES).nullable(),
+      occurredAt: isoDate,
+      failureReasonCode: z.enum(FAILURE_REASONS).nullable(),
+    }),
+  ),
+});
+export type MerchantOrderStatus = z.infer<typeof merchantOrderStatusSchema>;
+
 /** ERP: delivery.api.ParcelStatusChanged (+ ParcelStatusChangedData). Unknown fields are ignored. */
 export const statusChangedEventSchema = z.object({
   eventId: z.string().uuid(),

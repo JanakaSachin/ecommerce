@@ -1,6 +1,28 @@
-import { createHmac, timingSafeEqual } from "crypto";
+import { createHash, createHmac, timingSafeEqual } from "crypto";
 
 export const TOLERANCE_SECONDS = 300;
+
+/**
+ * Signs a request to SwiftDrop's merchant API (SwiftDrop Phase 5, `ApiRequestSignature`):
+ * "v1=" + hex(HMAC_SHA256(secret, timestamp + "." + METHOD + "." + path + "." + sha256hex(body))).
+ * `path` is the request path as sent, without the query string; `body` is the exact bytes sent
+ * (empty string for GET).
+ */
+export function signRequestV1(
+  secret: string,
+  timestamp: string,
+  method: string,
+  path: string,
+  body: string,
+): string {
+  const bodyDigest = createHash("sha256").update(body, "utf8").digest("hex");
+  return (
+    "v1=" +
+    createHmac("sha256", secret)
+      .update(`${timestamp}.${method}.${path}.${bodyDigest}`, "utf8")
+      .digest("hex")
+  );
+}
 
 /**
  * Computes signature as "v1=" + hex(HMAC_SHA256(key = secret, message = timestamp + "." + rawBody)).

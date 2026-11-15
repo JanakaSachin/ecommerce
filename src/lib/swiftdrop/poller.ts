@@ -1,7 +1,7 @@
 import "server-only";
 import { db } from "@/lib/db";
 import { env } from "@/lib/env";
-import { applyTrackingHistory } from "./apply-status";
+import { applyOrderStatus } from "./apply-status";
 import { swiftDrop } from "./client";
 
 /**
@@ -28,15 +28,15 @@ export async function pollOpenShipments(
 
   for (const s of due) {
     try {
-      const view = await swiftDrop().getTracking(s.trackingNumber!);
+      const order = await swiftDrop().getOrderStatus(s.merchantRef);
       await db.$transaction(async (tx) => {
-        if (view) {
-          moved += await applyTrackingHistory(tx, s.id, view, "POLL");
+        if (order) {
+          moved += await applyOrderStatus(tx, s.id, order, "POLL");
         }
         await tx.shipment.update({ where: { id: s.id }, data: { lastPolledAt: new Date() } });
       });
-      if (!view) {
-        console.warn(`[poller] SwiftDrop doesn't know ${s.trackingNumber} (${s.merchantRef})`);
+      if (!order) {
+        console.warn(`[poller] SwiftDrop doesn't know ${s.merchantRef} (${s.trackingNumber})`);
       }
     } catch (e) {
       errors++;

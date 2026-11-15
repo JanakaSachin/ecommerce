@@ -7,7 +7,7 @@ import { randomUUID } from "crypto";
 import { db } from "@/lib/db";
 import { requireAdmin } from "@/lib/session";
 import { bookShipment, retryDueBookings } from "@/lib/swiftdrop/booking";
-import { applyTrackingHistory } from "@/lib/swiftdrop/apply-status";
+import { applyOrderStatus } from "@/lib/swiftdrop/apply-status";
 import { merchantRefFor } from "@/lib/swiftdrop/reference";
 import { handleStatusEvent } from "@/lib/swiftdrop/webhook";
 import { isTerminal } from "@/lib/swiftdrop/status";
@@ -69,14 +69,14 @@ export async function pollShipmentNow(formData: FormData): Promise<void> {
   }
 
   try {
-    const view = await swiftDrop().getTracking(shipment.trackingNumber);
+    const view = await swiftDrop().getOrderStatus(shipment.merchantRef);
     if (!view) {
-      return finish(formData, false, `SwiftDrop returned 404 for ${shipment.trackingNumber}`);
+      return finish(formData, false, `SwiftDrop returned 404 for ${shipment.merchantRef}`);
     }
 
     let moved = false;
     await db.$transaction(async (tx) => {
-      if ((await applyTrackingHistory(tx, shipment.id, view, "POLL")) > 0) moved = true;
+      if ((await applyOrderStatus(tx, shipment.id, view, "POLL")) > 0) moved = true;
       await tx.shipment.update({
         where: { id: shipment.id },
         data: { lastPolledAt: new Date() },
@@ -273,6 +273,66 @@ export async function simulateFailure(formData: FormData): Promise<void> {
     res.http === 200,
     res.http === 200
       ? `Simulated ${shipment.merchantRef} -> FAILED (${reason})`
+      : `Simulation error: ${JSON.stringify(res.body)}`,
+  );
+}
+
+/**
+ * Simulates the seller's hold controls in mock mode, as SwiftDrop sends them: HOLD (CREATED to PAUSED),
+ * RELEASE (PAUSED back to CREATED) and CANCEL (CREATED or PAUSED to CANCELLED). Only allowed before pickup.
+ */
+export async function simulateHold(formData: FormData): Promise<void> {
+  await requireAdmin();
+  if (!isMock()) return finish(formData, false, "Simulator operates only in MOCK mode");
+
+  const shipmentId = String(formData.get("shipmentId") ?? "");
+  const kind = String(formData.get("kind") ?? "");
+  const shipment = await db.shipment.findUnique({
+    where: { id: shipmentId },
+    select: {
+      merchantRef: true,
+      trackingNumber: true,
+      parcelId: true,
+      deliveryStatus: true,
+      lastSequence: true,
+    },
+  });
+  if (!shipment?.deliveryStatus) return finish(formData, false, "Shipment has not been booked yet");
+
+  const current = shipment.deliveryStatus;
+  const target: DeliveryStatus | null =
+    kind === "HOLD" && current === "CREATED"
+      ? "PAUSED"
+      : kind === "RELEASE" && current === "PAUSED"
+        ? "CREATED"
+        : kind === "CANCEL" && (current === "CREATED" || current === "PAUSED")
+          ? "CANCELLED"
+          : null;
+  if (!target) return finish(formData, false, `Cannot ${kind || "change"} a shipment that is ${current}`);
+
+  const res = await handleStatusEvent({
+    eventId: randomUUID(),
+    eventType: "parcel.status-changed",
+    schemaVersion: 1,
+    occurredAt: new Date().toISOString(),
+    producer: "delivery",
+    data: {
+      parcelId: shipment.parcelId ?? randomUUID(),
+      trackingNumber: shipment.trackingNumber ?? "SD0000000000",
+      previousStatus: current,
+      newStatus: target,
+      sequence: shipment.lastSequence + 1,
+      source: "MERCHANT",
+      ownerMerchantId: randomUUID(),
+      merchantOrderReference: shipment.merchantRef,
+      failureReasonCode: null,
+    },
+  });
+  finish(
+    formData,
+    res.http === 200,
+    res.http === 200
+      ? `Simulated ${shipment.merchantRef} -> ${target}`
       : `Simulation error: ${JSON.stringify(res.body)}`,
   );
 }

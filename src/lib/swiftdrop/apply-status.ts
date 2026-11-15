@@ -1,7 +1,7 @@
 import "server-only";
 import type { DeliveryStatus, EventSource, FailureReason, Prisma } from "@prisma/client";
 import { shipmentStateFor, shouldMoveTo } from "./status";
-import type { PublicTracking } from "./types";
+import type { MerchantOrderStatus, PublicTracking } from "./types";
 
 export type StatusNews = {
   status: DeliveryStatus;
@@ -103,6 +103,32 @@ export async function applyTrackingHistory(
       occurredAt: new Date(h.occurredAt),
       source,
       sequence: i + 1,
+    });
+    if (r.moved) moved++;
+  }
+  return moved;
+}
+
+/**
+ * Applies the signed order-status API's events to a shipment. Unlike the public tracking history,
+ * each event carries SwiftDrop's own sequence number and failure reason.
+ * MUST be called inside db.$transaction(async (tx) => ...). Returns how many events moved it.
+ */
+export async function applyOrderStatus(
+  tx: Prisma.TransactionClient,
+  shipmentId: string,
+  order: MerchantOrderStatus,
+  source: EventSource,
+): Promise<number> {
+  let moved = 0;
+  for (const e of [...order.events].sort((a, b) => a.sequence - b.sequence)) {
+    const r = await applyStatus(tx, shipmentId, {
+      status: e.status,
+      occurredAt: new Date(e.occurredAt),
+      source,
+      sequence: e.sequence,
+      eventId: e.eventId,
+      failureReason: e.failureReasonCode,
     });
     if (r.moved) moved++;
   }

@@ -9,6 +9,7 @@ import {
   pollShipmentNow,
   simulateNextStatus,
   simulateFailure,
+  simulateHold,
 } from "@/app/actions/admin";
 import StatusBadge from "@/components/StatusBadge";
 import Pager from "@/components/admin/Pager";
@@ -233,6 +234,42 @@ export default async function AdminShipmentsPage({ searchParams }: { searchParam
                                 Fail ✕
                               </button>
                             </form>
+                            {s.deliveryStatus === "CREATED" && (
+                            <form action={simulateHold} className="inline">
+                              <input type="hidden" name="shipmentId" value={s.id} />
+                              <input type="hidden" name="kind" value="HOLD" />
+                              <button
+                                type="submit"
+                                className="rounded border border-gray-300 bg-white px-2 py-1 text-xs font-medium text-gray-700 hover:bg-gray-50"
+                              >
+                                Hold ⏸
+                              </button>
+                            </form>
+                            )}
+                            {s.deliveryStatus === "PAUSED" && (
+                            <form action={simulateHold} className="inline">
+                              <input type="hidden" name="shipmentId" value={s.id} />
+                              <input type="hidden" name="kind" value="RELEASE" />
+                              <button
+                                type="submit"
+                                className="rounded border border-gray-300 bg-white px-2 py-1 text-xs font-medium text-gray-700 hover:bg-gray-50"
+                              >
+                                Release ▶
+                              </button>
+                            </form>
+                            )}
+                            {(s.deliveryStatus === "CREATED" || s.deliveryStatus === "PAUSED") && (
+                            <form action={simulateHold} className="inline">
+                              <input type="hidden" name="shipmentId" value={s.id} />
+                              <input type="hidden" name="kind" value="CANCEL" />
+                              <button
+                                type="submit"
+                                className="rounded border border-red-300 bg-white px-2 py-1 text-xs font-medium text-red-700 hover:bg-red-50"
+                              >
+                                Cancel ✕
+                              </button>
+                            </form>
+                            )}
                           </>
                         )}
 

@@ -2,7 +2,12 @@ import "server-only";
 import { createHash } from "crypto";
 import type { SwiftDropClient } from "./client";
 import { SwiftDropError } from "./errors";
-import type { CreateMerchantOrderRequest, MerchantOrderResponse, PublicTracking } from "./types";
+import type {
+  CreateMerchantOrderRequest,
+  MerchantOrderResponse,
+  MerchantOrderStatus,
+  PublicTracking,
+} from "./types";
 
 const ALPHABET = "0123456789ABCDEFGHJKMNPQRSTVWXYZ"; // same Crockford-style Base32 characters SwiftDrop uses
 
@@ -43,5 +48,8 @@ export const mockClient: SwiftDropClient = {
   },
   async getTracking(): Promise<PublicTracking | null> {
     return null; // in mock mode, status changes come from webhook simulator
+  },
+  async getOrderStatus(): Promise<MerchantOrderStatus | null> {
+    return null; // same: the simulator drives status changes in mock mode
   },
 };

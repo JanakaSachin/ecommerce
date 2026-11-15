@@ -6,6 +6,8 @@ const schema = z
     SWIFTDROP_MODE: z.enum(["mock", "live"]).default("mock"),
     SWIFTDROP_API_URL: z.string().url().default("http://localhost:8080"),
     SWIFTDROP_API_KEY: z.string().default(""),
+    // Signs requests to SwiftDrop. Needed once SwiftDrop requires signatures; optional until then.
+    SWIFTDROP_SIGNING_SECRET: z.string().default(""),
     SWIFTDROP_WEBHOOK_SECRET: z.string().min(16, "must be at least 16 characters"),
     SWIFTDROP_TIMEOUT_MS: z.coerce.number().int().positive().default(8000),
     SWIFTDROP_POLL_INTERVAL_SEC: z.coerce.number().int().min(30).default(300),

@@ -1,7 +1,7 @@
 // Zone Synchronization Script (for Live Mode)
 // Usage: npm run zones:sync
 import { PrismaClient } from "@prisma/client";
-import { DISTRICTS } from "../src/lib/districts";
+import { DISTRICTS, swiftDropZoneCode } from "../src/lib/districts";
 
 const db = new PrismaClient();
 const erp = (process.env.SWIFTDROP_API_URL ?? "http://localhost:8080").replace(/\/+$/, "");
@@ -62,7 +62,7 @@ async function main() {
   // Map each district to the zone matching its province code
   const byCode = new Map(zones.map((z) => [z.code, z.id]));
   for (const [district, code] of Object.entries(DISTRICTS)) {
-    const zoneId = byCode.get(code);
+    const zoneId = byCode.get(swiftDropZoneCode(code));
     if (zoneId) {
       await db.districtZone.upsert({
         where: { district },
@@ -70,7 +70,7 @@ async function main() {
         update: { zoneId },
       });
     } else {
-      console.warn(`[zones:sync] Warning: No zone found with code ${code} for district ${district}`);
+      console.warn(`[zones:sync] Warning: No zone found with code ${swiftDropZoneCode(code)} for district ${district}`);
     }
   }
 
