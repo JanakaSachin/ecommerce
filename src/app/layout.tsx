@@ -4,7 +4,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 
 export const metadata: Metadata = {
-  title: "StrideLK Timepieces – Luxury & Precision Watches",
+  title: "ChronoLK Timepieces – Luxury & Precision Watches",
   description: "Curated automatic, chronograph, and luxury watches. Island-wide insured delivery powered by SwiftDrop.",
 };
 

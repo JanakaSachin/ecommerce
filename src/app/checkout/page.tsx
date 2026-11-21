@@ -4,7 +4,7 @@ import { getCart, summarizeCart } from "@/lib/cart";
 import { getSession } from "@/lib/session";
 import CheckoutForm from "@/components/CheckoutForm";
 
-export const metadata = { title: "Checkout – StrideLK" };
+export const metadata = { title: "Checkout – ChronoLK" };
 
 export default async function CheckoutPage() {
   const { items, subtotal, hasStockIssue } = summarizeCart(await getCart());

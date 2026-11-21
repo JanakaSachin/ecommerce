@@ -2,7 +2,7 @@ import Link from "next/link";
 import { getSession } from "@/lib/session";
 import TrackForm from "@/components/TrackForm";
 
-export const metadata = { title: "Track Your Order – StrideLK" };
+export const metadata = { title: "Track Your Order – ChronoLK" };
 
 export default async function TrackPage({
   searchParams,
@@ -17,7 +17,7 @@ export default async function TrackPage({
       <div className="rounded-lg bg-white p-8 shadow-sm">
         <h1 className="text-2xl font-bold text-gray-900">Track your order</h1>
         <p className="mt-1 text-sm text-gray-500">
-          Enter your StrideLK order number or SwiftDrop tracking number, along with the email used at checkout.
+          Enter your ChronoLK order number or SwiftDrop tracking number, along with the email used at checkout.
         </p>
         <div className="mt-6">
           <TrackForm defaultRef={tn ?? ""} />

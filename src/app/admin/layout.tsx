@@ -1,7 +1,7 @@
 import { requireAdmin } from "@/lib/session";
 import AdminTabs from "@/components/admin/AdminTabs";
 
-export const metadata = { title: "Admin Console – StrideLK" };
+export const metadata = { title: "Admin Console – ChronoLK" };
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const admin = await requireAdmin();

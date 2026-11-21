@@ -3,7 +3,7 @@ import { getSession } from "@/lib/session";
 import { safeNext } from "@/lib/validation";
 import LoginForm from "@/components/LoginForm";
 
-export const metadata = { title: "Login – StrideLK" };
+export const metadata = { title: "Login – ChronoLK" };
 
 export default async function LoginPage({
   searchParams,

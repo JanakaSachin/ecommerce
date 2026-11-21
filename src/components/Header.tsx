@@ -26,7 +26,7 @@ export default async function Header() {
       <div className="mx-auto flex min-h-16 max-w-7xl flex-wrap items-center gap-x-4 gap-y-2 px-4 py-2.5">
         <Link href="/" className="flex items-baseline gap-1 text-2xl font-extrabold tracking-tight text-white">
           <span>
-            Stride<span className="text-teal-300">LK</span>
+            Chrono<span className="text-teal-300">LK</span>
           </span>
           <span className="text-[10px] uppercase font-semibold tracking-widest text-teal-200/90 ml-1.5 px-1.5 py-0.5 rounded bg-white/10">
             Timepieces

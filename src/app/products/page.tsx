@@ -1,7 +1,7 @@
 import ProductListing from "@/components/ProductListing";
 import { toFilters, type SearchParams } from "@/lib/catalog";
 
-export const metadata = { title: "All Watches – StrideLK Timepieces" };
+export const metadata = { title: "All Watches – ChronoLK Timepieces" };
 
 export default async function ProductsPage({
   searchParams,

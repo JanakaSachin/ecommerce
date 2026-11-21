@@ -23,7 +23,7 @@ export default async function HomePage() {
       <section className="relative h-[480px] overflow-hidden bg-brand-dark">
         <Image
           src="/hero.jpg"
-          alt="Luxury Watches StrideLK"
+          alt="Luxury Watches ChronoLK"
           fill
           priority
           className="object-cover opacity-75"

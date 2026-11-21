@@ -39,7 +39,7 @@ export default function LoginForm({ next }: { next: string }) {
         {pending ? "Logging in..." : "Log in"}
       </button>
       <p className="text-center text-sm text-gray-600">
-        New to StrideLK?{" "}
+        New to ChronoLK?{" "}
         <Link
           href={`/register?next=${encodeURIComponent(next)}`}
           className="font-semibold text-accent hover:underline"

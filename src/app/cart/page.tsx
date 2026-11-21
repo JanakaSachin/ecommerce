@@ -4,7 +4,7 @@ import { getCart, summarizeCart, MAX_QTY_PER_LINE } from "@/lib/cart";
 import { formatLKR } from "@/lib/money";
 import { removeCartItem, updateCartItem } from "@/app/actions/cart";
 
-export const metadata = { title: "Your Cart – StrideLK Timepieces" };
+export const metadata = { title: "Your Cart – ChronoLK Timepieces" };
 
 export default async function CartPage() {
   const { items, subtotal, itemCount, hasStockIssue } = summarizeCart(await getCart());

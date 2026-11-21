@@ -61,7 +61,7 @@ export default function LiveOrderStatus({ initial }: { initial: OrderStatusDTO }
             cls: "border-green-200 bg-green-50 text-green-800",
             text: (
               <>
-                🎉 <b>Order #{n} delivered.</b> Thank you for shopping with StrideLK!
+                🎉 <b>Order #{n} delivered.</b> Thank you for shopping with ChronoLK!
               </>
             ),
           }

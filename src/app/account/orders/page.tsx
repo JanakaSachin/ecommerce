@@ -5,7 +5,7 @@ import { formatLKR } from "@/lib/money";
 import { formatDate } from "@/lib/dates";
 import StatusBadge from "@/components/StatusBadge";
 
-export const metadata = { title: "My Orders – StrideLK" };
+export const metadata = { title: "My Orders – ChronoLK" };
 
 export default async function MyOrdersPage() {
   const user = await requireUser("/account/orders");
@@ -29,7 +29,7 @@ export default async function MyOrdersPage() {
     <div className="mx-auto max-w-5xl px-4 py-8">
       <h1 className="text-2xl font-bold text-gray-900">My Orders</h1>
       <p className="mt-1 text-sm text-gray-500">
-        Hi {user.name}, here are your recent StrideLK orders.
+        Hi {user.name}, here are your recent ChronoLK orders.
       </p>
 
       {orders.length === 0 ? (

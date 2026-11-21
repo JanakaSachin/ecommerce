@@ -24,7 +24,7 @@ async function main() {
   console.log("Seeding watch catalog and database...");
 
   // 1. Admin user
-  const adminEmail = process.env.ADMIN_EMAIL ?? "admin@stridelk.local";
+  const adminEmail = process.env.ADMIN_EMAIL ?? "admin@chronolk.local";
   const adminPassword = process.env.ADMIN_PASSWORD ?? "Admin12345!";
   const passwordHash = await bcrypt.hash(adminPassword, 10);
 
