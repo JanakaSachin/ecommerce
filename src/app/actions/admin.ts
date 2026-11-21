@@ -152,9 +152,12 @@ export async function reship(formData: FormData): Promise<void> {
 }
 
 const NEXT_STATUS: Record<DeliveryStatus, DeliveryStatus | null> = {
+  // Same route as SwiftDrop (ADR 0007): every parcel reaches a hub after pickup.
   CREATED: "PICKED_UP",
-  PICKED_UP: "IN_TRANSIT",
-  IN_TRANSIT: "OUT_FOR_DELIVERY",
+  PICKED_UP: "HUB_ARRIVED",
+  HUB_ARRIVED: "OUT_FOR_DELIVERY",
+  HUB_SORTED: "IN_TRANSIT",
+  IN_TRANSIT: "HUB_ARRIVED",
   OUT_FOR_DELIVERY: "DELIVERED",
   DELIVERED: null,
   FAILED: null,

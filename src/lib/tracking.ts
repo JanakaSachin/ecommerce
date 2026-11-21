@@ -54,6 +54,13 @@ export const isFinal = (input: OrderStatusDTO | string | null | undefined): bool
 // Main steps in chronological order per ADR 0006 (no ASSIGNED status)
 const MAIN_STEPS = ["CREATED", "PICKED_UP", "IN_TRANSIT", "OUT_FOR_DELIVERY"] as const;
 
+/**
+ * SwiftDrop moves a parcel through one or more hubs (ADR 0007): HUB_ARRIVED, HUB_SORTED and
+ * IN_TRANSIT between hubs. For the buyer all of that is one "On the way" step.
+ */
+const timelineStepOf = (status: string): string =>
+  status === "HUB_ARRIVED" || status === "HUB_SORTED" ? "IN_TRANSIT" : status;
+
 export type TimelineStep = {
   status: string;
   label: string;
@@ -83,13 +90,16 @@ export function buildTimeline(dto: OrderStatusDTO): TimelineStep[] {
 
   const eventMap = new Map<string, OrderStatusDTO["shipment"] extends infer S ? (S extends { events: (infer E)[] } ? E : never) : never>();
   for (const e of shipment.events) {
-    // Keep the first booking time, but the latest hold (a delivery can be held more than once).
-    if (!eventMap.has(e.status) || e.status === "PAUSED") eventMap.set(e.status, e);
+    const step = timelineStepOf(e.status);
+    // Keep the first time of a step (first hub reached), but the latest hold (a delivery can be held
+    // more than once).
+    if (!eventMap.has(step) || step === "PAUSED") eventMap.set(step, e);
   }
 
+  const currentStep = timelineStepOf(shipment.deliveryStatus);
   let reached = -1;
   steps.forEach((s, i) => {
-    if (eventMap.has(s) || s === shipment.deliveryStatus) {
+    if (eventMap.has(s) || s === currentStep) {
       reached = Math.max(reached, i);
     }
   });
@@ -142,7 +152,10 @@ export function statusBadge(state?: string, deliveryStatus?: string | null) {
     case "OUT_FOR_DELIVERY":
       return { label: "Out for delivery", cls: "bg-emerald-100 text-emerald-900 border border-emerald-300" };
     case "IN_TRANSIT":
+    case "HUB_SORTED":
       return { label: "In transit", cls: "bg-cyan-100 text-cyan-900 border border-cyan-300" };
+    case "HUB_ARRIVED":
+      return { label: "At a SwiftDrop hub", cls: "bg-cyan-100 text-cyan-900 border border-cyan-300" };
     case "PICKED_UP":
       return { label: "Picked up", cls: "bg-teal-50 text-teal-800 border border-teal-200" };
     case "PAUSED":

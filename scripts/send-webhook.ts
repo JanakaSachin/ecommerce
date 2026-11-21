@@ -14,7 +14,7 @@ if (!ref || !status) {
 const SEQ: Record<string, number> = {
   CREATED: 1,
   PICKED_UP: 2,
-  IN_TRANSIT: 3,
+  HUB_ARRIVED: 3, // SwiftDrop routes every parcel through a hub (ADR 0007)
   OUT_FOR_DELIVERY: 4,
   DELIVERED: 5,
   FAILED: 5,
@@ -23,8 +23,8 @@ const SEQ: Record<string, number> = {
 const PREV: Record<string, string | null> = {
   CREATED: null,
   PICKED_UP: "CREATED",
-  IN_TRANSIT: "PICKED_UP",
-  OUT_FOR_DELIVERY: "IN_TRANSIT",
+  HUB_ARRIVED: "PICKED_UP",
+  OUT_FOR_DELIVERY: "HUB_ARRIVED",
   DELIVERED: "OUT_FOR_DELIVERY",
   FAILED: "OUT_FOR_DELIVERY",
 };

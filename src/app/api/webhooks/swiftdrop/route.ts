@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { env } from "@/lib/env";
 import { verifyV1 } from "@/lib/swiftdrop/signature";
-import { STATUS_CHANGED, statusChangedEventSchema } from "@/lib/swiftdrop/types";
+import { isKnownStatus, STATUS_CHANGED, statusChangedEventSchema } from "@/lib/swiftdrop/types";
 import { handleStatusEvent, logWebhook } from "@/lib/swiftdrop/webhook";
 
 export const runtime = "nodejs"; // needs Node.js crypto
@@ -48,6 +48,21 @@ export async function POST(req: Request) {
       error: "Body is not JSON",
     });
     return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
+  }
+
+  // A status the store does not know yet (SwiftDrop added one): acknowledge, so SwiftDrop does not
+  // mark the delivery failed, and log it. Polling applies later known statuses by sequence.
+  const newStatus = (json as { data?: { newStatus?: unknown } } | null)?.data?.newStatus;
+  if (typeof newStatus === "string" && !isKnownStatus(newStatus)) {
+    await logWebhook({
+      rawEventId: headerEventId,
+      eventType: h("x-swiftdrop-event-type") || null,
+      signatureValid: true,
+      result: "IGNORED",
+      error: `Unknown status ${newStatus.slice(0, 40)}`,
+      payload: json,
+    });
+    return NextResponse.json({ ok: true, ignored: "unknown status" });
   }
 
   const parsed = statusChangedEventSchema.safeParse(json);

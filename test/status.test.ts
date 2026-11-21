@@ -152,3 +152,39 @@ describe("final states and badges", () => {
     expect(statusBadge("CANCELLED", "CANCELLED").label).toBe("Cancelled");
   });
 });
+
+describe("timeline for deliveries routed through hubs", () => {
+  it("shows a parcel at a hub as on the way", () => {
+    const steps = buildTimeline(dto("HUB_ARRIVED", "BOOKED", ["CREATED", "PICKED_UP", "HUB_ARRIVED"]));
+    expect(steps.map((s) => [s.status, s.state])).toEqual([
+      ["CREATED", "done"],
+      ["PICKED_UP", "done"],
+      ["IN_TRANSIT", "current"],
+      ["OUT_FOR_DELIVERY", "upcoming"],
+      ["DELIVERED", "upcoming"],
+    ]);
+  });
+
+  it("keeps the first hub arrival time for the on-the-way step and finishes normally", () => {
+    const d = dto("DELIVERED", "DELIVERED", [
+      "CREATED",
+      "PICKED_UP",
+      "HUB_ARRIVED",
+      "HUB_SORTED",
+      "IN_TRANSIT",
+      "HUB_ARRIVED",
+      "OUT_FOR_DELIVERY",
+      "DELIVERED",
+    ]);
+    const steps = buildTimeline(d);
+    expect(steps.every((s) => s.state === "done")).toBe(true);
+    expect(steps[2].at).toBe(d.shipment!.events[2].occurredAt);
+  });
+
+  it("keeps hub statuses open and labels them", () => {
+    expect(shipmentStateFor("HUB_ARRIVED")).toBe("BOOKED");
+    expect(shipmentStateFor("HUB_SORTED")).toBe("BOOKED");
+    expect(statusBadge("BOOKED", "HUB_ARRIVED").label).toBe("At a SwiftDrop hub");
+    expect(statusBadge("BOOKED", "HUB_SORTED").label).toBe("In transit");
+  });
+});

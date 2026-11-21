@@ -23,6 +23,8 @@ enum DeliveryStatus {
   CREATED
   PICKED_UP
   IN_TRANSIT
+  HUB_ARRIVED // arrived at a SwiftDrop hub (origin, Colombo Main Hub or destination)
+  HUB_SORTED  // sorted at the hub, waiting for the next leg
   OUT_FOR_DELIVERY
   DELIVERED
   FAILED

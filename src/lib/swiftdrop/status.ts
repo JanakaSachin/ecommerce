@@ -40,6 +40,8 @@ export const STATUS_LABELS: Record<DeliveryStatus, string> = {
   CREATED: "Delivery booked with SwiftDrop",
   PICKED_UP: "Picked up from our warehouse",
   IN_TRANSIT: "On the way to your area",
+  HUB_ARRIVED: "Arrived at a SwiftDrop hub",
+  HUB_SORTED: "Sorted at the hub and on its way",
   OUT_FOR_DELIVERY: "Out for delivery. Keep your phone nearby!",
   DELIVERED: "Delivered",
   FAILED: "Delivery unsuccessful",

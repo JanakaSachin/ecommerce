@@ -4,6 +4,8 @@ export const PARCEL_STATUSES = [
   "CREATED",
   "PICKED_UP",
   "IN_TRANSIT",
+  "HUB_ARRIVED",
+  "HUB_SORTED",
   "OUT_FOR_DELIVERY",
   "DELIVERED",
   "FAILED",
@@ -11,6 +13,10 @@ export const PARCEL_STATUSES = [
   "CANCELLED",
 ] as const;
 export type ParcelStatus = (typeof PARCEL_STATUSES)[number];
+
+/** Whether SwiftDrop's status is one the store knows; SwiftDrop may add statuses later. */
+export const isKnownStatus = (s: string): s is ParcelStatus =>
+  (PARCEL_STATUSES as readonly string[]).includes(s);
 
 export const FAILURE_REASONS = [
   "RECIPIENT_UNAVAILABLE",
@@ -73,19 +79,26 @@ export const merchantOrderStatusSchema = z.object({
   parcelId: z.string().uuid(),
   trackingNumber: z.string(),
   merchantOrderReference: z.string(),
-  status: z.enum(PARCEL_STATUSES),
+  // Strings, not the enum: a status the store does not know yet must not make the whole order
+  // unreadable. Events with an unknown status are dropped; later known events still apply, because
+  // the store orders news by sequence, not by status.
+  status: z.string(),
   lastSequence: z.number().int().min(0),
   createdAt: isoDate,
-  events: z.array(
-    z.object({
-      sequence: z.number().int().min(1),
-      eventId: z.string().uuid(),
-      status: z.enum(PARCEL_STATUSES),
-      previousStatus: z.enum(PARCEL_STATUSES).nullable(),
-      occurredAt: isoDate,
-      failureReasonCode: z.enum(FAILURE_REASONS).nullable(),
-    }),
-  ),
+  events: z
+    .array(
+      z.object({
+        sequence: z.number().int().min(1),
+        eventId: z.string().uuid(),
+        status: z.string(),
+        previousStatus: z.string().nullable(),
+        occurredAt: isoDate,
+        failureReasonCode: z.enum(FAILURE_REASONS).nullable(),
+      }),
+    )
+    .transform((events) =>
+      events.flatMap((e) => (isKnownStatus(e.status) ? [{ ...e, status: e.status }] : [])),
+    ),
 });
 export type MerchantOrderStatus = z.infer<typeof merchantOrderStatusSchema>;
 
@@ -99,7 +112,7 @@ export const statusChangedEventSchema = z.object({
   data: z.object({
     parcelId: z.string().uuid(),
     trackingNumber: z.string(),
-    previousStatus: z.enum(PARCEL_STATUSES).nullable(),
+    previousStatus: z.string().nullable(), // informational only; may be a status the store does not know
     newStatus: z.enum(PARCEL_STATUSES),
     sequence: z.number().int().min(1),
     source: z.string(),
