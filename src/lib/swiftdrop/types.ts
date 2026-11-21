@@ -45,7 +45,8 @@ export type MerchantOrderAddress = {
 /** ERP: merchant.web.CreateMerchantOrderRequest */
 export type CreateMerchantOrderRequest = {
   merchantOrderReference: string;
-  pickup: MerchantOrderAddress;
+  /** Omit to use the pickup address registered with the SwiftDrop merchant account. */
+  pickup?: MerchantOrderAddress;
   dropoff: MerchantOrderAddress;
   size: ParcelSize;
   weightGrams: number;

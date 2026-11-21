@@ -1,7 +1,7 @@
 import "server-only";
 import type { Order, Shipment } from "@prisma/client";
 import { db } from "@/lib/db";
-import { env } from "@/lib/env";
+import { env, storePickup } from "@/lib/env";
 import { applyOrderStatus, applyStatus } from "./apply-status";
 import { swiftDrop } from "./client";
 import { SwiftDropError, type FailureKind } from "./errors";
@@ -16,19 +16,12 @@ function backoffMs(attempt: number): number {
 }
 
 export function buildCreateRequest(s: Shipment & { order: Order }): CreateMerchantOrderRequest {
-  const e = env();
   const o = s.order;
+  // No STORE_PICKUP_* settings: send no pickup, so SwiftDrop uses the merchant's registered pickup address
+  const pickup = storePickup(env());
   return {
     merchantOrderReference: s.merchantRef,
-    pickup: {
-      contactName: e.STORE_PICKUP_NAME,
-      phone: e.STORE_PICKUP_PHONE,
-      line1: e.STORE_PICKUP_LINE1,
-      line2: e.STORE_PICKUP_LINE2,
-      city: e.STORE_PICKUP_CITY,
-      zoneId: e.STORE_PICKUP_ZONE_ID,
-      postalCode: e.STORE_PICKUP_POSTAL_CODE,
-    },
+    ...(pickup ? { pickup } : {}),
     dropoff: {
       contactName: o.customerName,
       phone: o.phone,
