@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 export default function Footer() {
   return (
     <footer className="mt-16 bg-brand-dark text-sm text-teal-100/90 border-t border-brand">
@@ -16,10 +18,10 @@ export default function Footer() {
         <div>
           <p className="font-semibold text-white">Collections</p>
           <ul className="mt-3 space-y-1.5 text-teal-100/80">
-            <li><a href="/category/automatic" className="hover:text-white">Automatic &amp; Mechanical</a></li>
-            <li><a href="/category/chronograph" className="hover:text-white">Chronograph</a></li>
-            <li><a href="/category/classic" className="hover:text-white">Classic &amp; Dress</a></li>
-            <li><a href="/category/smartwatches" className="hover:text-white">Smartwatches</a></li>
+            <li><Link href="/category/automatic" className="hover:text-white">Automatic &amp; Mechanical</Link></li>
+            <li><Link href="/category/chronograph" className="hover:text-white">Chronograph</Link></li>
+            <li><Link href="/category/classic" className="hover:text-white">Classic &amp; Dress</Link></li>
+            <li><Link href="/category/smartwatches" className="hover:text-white">Smartwatches</Link></li>
           </ul>
         </div>
         <div>
