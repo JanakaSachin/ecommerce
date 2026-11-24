@@ -140,7 +140,7 @@ export async function reship(formData: FormData): Promise<void> {
     });
 
     after(() => {
-      bookShipment(newShipmentId).catch((err) => {
+      return bookShipment(newShipmentId).catch((err) => {
         console.error(`[admin] Background re-shipment error for ${merchantRef}:`, err);
       });
     });

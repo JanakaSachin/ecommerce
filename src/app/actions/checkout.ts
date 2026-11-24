@@ -176,9 +176,9 @@ export async function placeOrder(_prev: CheckoutState, formData: FormData): Prom
     throw e;
   }
 
-  // 5. Book with SwiftDrop asynchronously after HTTP response (Order is already committed safely)
+  // 5. Book with SwiftDrop after the response. Return the promise so the serverless function waits for it.
   after(() => {
-    bookShipment(shipmentId).catch((err) => {
+    return bookShipment(shipmentId).catch((err) => {
       console.error(`[checkout] Background booking error for shipment ${shipmentId}:`, err);
     });
   });
